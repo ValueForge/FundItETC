@@ -20,7 +20,13 @@ contract CrowdFunding {
     uint256 public numberofCampaigns = 0;
 
     //Function create new campaign
-    function createCampaign(address _owner, string memory _title, string memory _description, uint26 _target, uint256 _deadline, string memory _image) public returns(uint256) {
+    function createCampaign(
+        address _owner, 
+        string memory _title, 
+        string memory _description, 
+        uint26 _target, 
+        uint256 _deadline, 
+        string memory _image) public returns(uint256) {
         
         //Set index for new campaign in Campaign
         Campaign storage campaign = campaigns[numberofCampaigns];
@@ -38,7 +44,7 @@ contract CrowdFunding {
         campaign.image = _image;
 
         //Increment campaign index
-        numberOfCampaigns ++;
+        numberOfCampaigns++;
 
         return numberOfCampaigns - 1;
     }
@@ -61,13 +67,12 @@ contract CrowdFunding {
 
 
     //Function to list donors to a campaign
-    function getDonors (uint256 _id) view public returns (address[] memory, uint256[] memory) {
+    function getDonors (uint256 _id,) view public returns (address[] memory, uint256[] memory) {
         
         Campaign storage campaign = campaigns[_id];
 
         return (campaign.donors, campaign.donations);
     }
-
 
     //Function to list campaigns
     function getCampaigns() view public returns (Campaign[] memory) {
