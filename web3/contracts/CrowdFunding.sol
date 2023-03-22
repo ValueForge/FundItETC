@@ -37,13 +37,13 @@ contract CrowdFunding {
         campaign.amountCollected = 0;
         campaign.image = _image;
 
-        //increment campaign index
+        //Increment campaign index
         numberOfCampaigns ++;
 
         return numberOfCampaigns - 1;
     }
 
-    //Function to record campaign donations
+    //Function to process donating to a campaign
     function donateToCampaign (uint256 _id) public payable {
         uint256 amount = msg.value;
 
@@ -70,4 +70,13 @@ contract CrowdFunding {
 
 
     //Function to list campaigns
+    function getCampaigns() view public returns (Campaign[] memory) {
+        Campaign[] memory allCampaigns = new Campaign[](numberOfCampaigns);
+
+        for (uint256 i = 0; i < numberOfCampaigns; i++) {
+            allCampaigns[i] = campaigns[i];
+        }
+
+        return allCampaigns;
+    }
 }
