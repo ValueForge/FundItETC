@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
+
 contract FundIt {
     struct Campaign {
         address payable owner;
@@ -87,7 +88,7 @@ contract FundIt {
     }
 
     // Function to list ended campaigns
-    function getEndedCampaigns() external view returns (Campaign[] memory) {
+    function getEndedCampaigns() external returns (Campaign[] memory) {
         Campaign[] memory endedCampaigns = new Campaign[](numberOfCampaigns);
         uint256 endedCampaignsCount = 0;
 
@@ -107,7 +108,7 @@ contract FundIt {
     function endCampaign(uint256 _id) external {
         Campaign storage campaign = campaigns[_id];
 
-        require(campaign.active, "Campaign is not active
+        require(campaign.active, "Campaign is not active");
         require(campaign.owner == msg.sender, "You are not the campaign owner");
 
         campaign.active = false;
