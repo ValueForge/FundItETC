@@ -1,7 +1,14 @@
 # FundItETC
-An open source, decentralized crowd funding platform for Ethereum Classic 
 
-Change log
+FundItETC is an open-source, decentralized crowd funding platform in development for deployment on Ethereum Classic.
+
+## Development environment
+
+FundItETC is a Solidity smart contract developed for and deployed to the ETC network using the thirdweb Web3 framework.
+
+FundItETC will be accompanied by a JavaScript-based UI application and website which is expected to utilize the Tailwind CSS framework.
+
+## Change log
 
 Here are the changes and explanations from the original JSMastery project:
 
@@ -25,8 +32,6 @@ Here are the changes and explanations from the original JSMastery project:
 - Added a `fundit` folder to contain the main contract, proxy contract, and interface contract.
 - Moved `fundit`, `ifundit`, and `funditproxy` contracts to the `contracts/fundit` folder.
 
-TO DO:
+## TO DO:
 
 - Add annotations to the `fundit` contract to explain the functions and variables.
-
-- 
