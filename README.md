@@ -23,6 +23,10 @@ Here are the changes and explanations from the original JSMastery project:
 - Added funditproxy.sol proxy contract to allow for the upgrade of the main contract without affecting the proxy contract.  This is to be done by changing the address of the main contract in the proxy contract.
 - Changed all relevant functions to use the proxy contract instead of the main contract address.
 - Added a `fundit` folder to contain the main contract, proxy contract, and interface contract.
-- Added annotations to the main contract to explain the functions and variables.
+- Moved `fundit`, `ifundit`, and `funditproxy` contracts to the `contracts/fundit` folder.
+
+TO DO:
+
+- Add annotations to the `fundit` contract to explain the functions and variables.
 
 - 
