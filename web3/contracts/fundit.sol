@@ -2,7 +2,7 @@
 pragma solidity ^0.8.9;
 
 
-contract FundIt {
+contract FundIt is IFundIt {
     struct Campaign {
         address payable owner;
         string title;
@@ -14,6 +14,8 @@ contract FundIt {
         address[] donors;
         uint256[] donations;
         bool active;
+    } external override {
+    
     }
 
     mapping(uint256 => Campaign) public campaigns;
@@ -27,7 +29,7 @@ contract FundIt {
         uint256 _target,
         uint256 _duration,
         string memory _image
-    ) external {
+    ) external override {
         require(bytes(_title).length > 0, "Title is required");
         require(bytes(_description).length > 0, "Description is required");
         require(_target > 0, "Target amount must be greater than 0");
@@ -47,7 +49,7 @@ contract FundIt {
     }
 
     // Function to process donations to a campaign
-    function donateToCampaign(uint256 _id) external payable {
+    function donateToCampaign(uint256 _id) external payable override {
         require(msg.value > 0, "Donation amount must be greater than 0");
 
         Campaign storage campaign = campaigns[_id];
@@ -64,14 +66,14 @@ contract FundIt {
     }
 
     // Function to list donors to a campaign
-    function getCampaignDonors(uint256 _id) external view returns (address[] memory, uint256[] memory) {
+    function getCampaignDonors(uint256 _id) external override returns (address[] memory, uint256[] memory) {
         Campaign storage campaign = campaigns[_id];
 
         return (campaign.donors, campaign.donations);
     }
 
     // Function to list active campaigns
-    function getActiveCampaigns() external view returns (Campaign[] memory) {
+    function getActiveCampaigns() external override returns (Campaign[] memory) {
         Campaign[] memory activeCampaigns = new Campaign[](numberOfCampaigns);
         uint256 activeCampaignsCount = 0;
 
@@ -88,7 +90,7 @@ contract FundIt {
     }
 
     // Function to list ended campaigns
-    function getEndedCampaigns() external returns (Campaign[] memory) {
+    function getEndedCampaigns() external override returns (Campaign[] memory) {
         Campaign[] memory endedCampaigns = new Campaign[](numberOfCampaigns);
         uint256 endedCampaignsCount = 0;
 
@@ -105,7 +107,7 @@ contract FundIt {
     }
 
     // Function to end a campaign
-    function endCampaign(uint256 _id) external {
+    function endCampaign(uint256 _id) external override {
         Campaign storage campaign = campaigns[_id];
 
         require(campaign.active, "Campaign is not active");
