@@ -26,8 +26,8 @@ Here are the changes and explanations from the original JSMastery project:
 - Changed the `getDonors` and `getCampaigns` functions to return arrays of `Campaign` structs for consistency.
 - Changed the `getActiveCampaigns` and `getEndedCampaigns` functions to only return campaigns that are active or have ended, respectively.
 - Added an `endCampaign` function to allow the campaign owner to end a campaign.
-- Added ifundit.sol interface contract to define the functions that the proxy contract will use.
-- Added funditproxy.sol proxy contract to allow for the upgrade of the main contract without affecting the proxy contract.  This is to be done by changing the address of the main contract in the proxy contract.
+- Added `ifundit.sol` interface contract to define the functions that the proxy contract will use.
+- Added `funditproxy.sol` proxy contract to allow for the upgrade of the main contract without affecting the proxy contract.  This is to be done by changing the address of the main contract in the proxy contract.
 - Changed all relevant functions to use the proxy contract instead of the main contract address.
 - Added a `fundit` folder to contain the main contract, proxy contract, and interface contract.
 - Moved `fundit`, `ifundit`, and `funditproxy` contracts to the `contracts/fundit` folder.
