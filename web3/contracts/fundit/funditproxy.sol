@@ -3,11 +3,12 @@ pragma solidity ^0.8.9;
 
 import "./ifundit.sol";
 
+
 contract FundItProxy {
     address private _implementation;
     address private _admin;
 
-    constructor(address implementation_, address admin_) {
+    constructor (address implementation_, address admin_) {
         _implementation = implementation_;
         _admin = admin_;
     }

@@ -1,8 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
+import "./ifundit.sol";
+import "./funditproxy.sol";
 
-contract FundIt is IFundIt {
+
+contract FundIt is IFundIt, FundItProxy {
     struct Campaign {
         address payable owner;
         string title;
