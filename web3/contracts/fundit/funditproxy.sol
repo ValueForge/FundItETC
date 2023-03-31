@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "./IFundIt.sol";
 
 
-contract FundItProxy is Ownable, IFundIt {
+contract FundItProxy is Ownable {
     address private _implementation;
 
     event ImplementationUpdated(address indexed newImplementation);
