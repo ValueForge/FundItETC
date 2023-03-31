@@ -3,22 +3,24 @@ pragma solidity ^0.8.9;
 
 interface IFundIt {
     struct Campaign {
-        address owner;
+        address payable owner;
         string title;
         string description;
         uint256 target;
         uint256 deadline;
         uint256 amountCollected;
         string image;
+        address[] donors;
+        uint256[] donations;
         bool active;
     }
 
     function createCampaign(
-        string memory _title,
-        string memory _description,
+        string calldata _title,
+        string calldata _description,
         uint256 _target,
         uint256 _duration,
-        string memory _image
+        string calldata _image
     ) external;
 
     function donateToCampaign(uint256 _id) external payable;
