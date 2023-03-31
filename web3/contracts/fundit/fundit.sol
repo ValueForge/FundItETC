@@ -1,15 +1,27 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
-import "./ifundit.sol";
-import "./funditstorage.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "./IFundIt.sol";
+import "./FundItProxy.sol";
+import "./FundItStorage.sol";
 
-contract FundIt is IFundIt, FundItStorage, Ownable {
-    event CampaignCreated(uint256 indexed campaignId, address indexed owner, string title, uint256 target);
-    event CampaignDonation(uint256 indexed campaignId, address indexed donor, uint256 amount);
+
+// The FundIt contract inherits from IFundIt, FundItProxy, FundItStorage, and ReentrancyGuard
+contract FundIt is IFundIt, FundItProxy, FundItStorage, ReentrancyGuard {
+    using SafeMath for uint256;
+
+    // Event emitted when a new campaign is created
+    event CampaignCreated(uint256 indexed campaignId, address indexed owner);
+
+    // Event emitted when a donation is made to a campaign
+    event DonationMade(uint256 indexed campaignId, address indexed donor, uint256 amount);
+
+    // Event emitted when a campaign is ended by its owner
     event CampaignEnded(uint256 indexed campaignId, address indexed owner);
 
+    // Modifier to check if a campaign with the given ID exists
     modifier campaignExists(uint256 _id) {
         require(_id < numberOfCampaigns, "Campaign does not exist");
         _;
@@ -22,63 +34,86 @@ contract FundIt is IFundIt, FundItStorage, Ownable {
         uint256 _target,
         uint256 _duration,
         string memory _image
-    ) external override onlyOwner {
+    ) external override nonReentrant {
+        // Validation checks
         require(bytes(_title).length > 0, "Title is required");
         require(bytes(_description).length > 0, "Description is required");
         require(_target > 0, "Target amount must be greater than 0");
         require(_duration > 0, "Campaign duration must be greater than 0");
 
+        // Create a new campaign and store it in the campaigns mapping
         Campaign storage campaign = campaigns[numberOfCampaigns];
 
         campaign.owner = payable(msg.sender);
         campaign.title = _title;
         campaign.description = _description;
         campaign.target = _target;
-        campaign.deadline = block.timestamp + _duration;
+        campaign.deadline = block.timestamp.add(_duration);
         campaign.image = _image;
         campaign.active = true;
 
-        emit CampaignCreated(numberOfCampaigns, msg.sender, _title, _target);
+        // Emit the CampaignCreated event
+        emit CampaignCreated(numberOfCampaigns, msg.sender);
+
+        // Increment the numberOfCampaigns counter
         numberOfCampaigns++;
     }
 
     // Function to process donations to a campaign
-    function donateToCampaign(uint256 _id) external payable override campaignExists(_id) {
+    function donateToCampaign(uint256 _id) external payable override nonReentrant campaignExists(_id) {
+        // Validation checks
         require(msg.value > 0, "Donation amount must be greater than 0");
 
         Campaign storage campaign = campaigns[_id];
 
         require(campaign.active, "Campaign is not active");
         require(campaign.deadline > block.timestamp, "Campaign has ended");
-    
+
+        // Transfer the donated amount to the campaign owner
         campaign.owner.transfer(msg.value);
-    
+
+        // Update the campaign's donors and donations arrays
         campaign.donors.push(msg.sender);
         campaign.donations.push(msg.value);
-    
-        campaign.amountCollected += msg.value;
 
-        emit CampaignDonation(_id, msg.sender, msg.value);
+        // Update the campaign's amountCollected
+        campaign.amountCollected = campaign.amountCollected.add(msg.value);
+
+        // Emit the DonationMade event
+        emit DonationMade(_id, msg.sender, msg.value);
     }
 
     // Function to list donors to a campaign
-    function getCampaignDonors(uint256 _id) external override returns (address[] memory, uint256[] memory) {
+    function getCampaignDonors(uint256 _id) external view override campaignExists(_id) returns (address[] memory, uint256[] memory) {
         Campaign storage campaign = campaigns[_id];
 
         return (campaign.donors, campaign.donations);
     }
 
     // Function to list active campaigns
-    function getActiveCampaigns() external override returns (Campaign[] memory) {
-        Campaign[] memory activeCampaigns = new Campaign[](numberOfCampaigns);
+    function getActiveCampaigns() external view override returns (Campaign[] memory) {
         uint256 activeCampaignsCount = 0;
 
+        // Count active campaigns
         for (uint256 i = 0; i < numberOfCampaigns; i++) {
             Campaign storage campaign = campaigns[i];
 
             if (campaign.active && campaign.deadline > block.timestamp) {
-                activeCampaigns[activeCampaignsCount] = campaign;
                 activeCampaignsCount++;
+            }
+        }
+
+        // Create a new dynamic array to store active campaigns
+        Campaign[] memory activeCampaigns = new Campaign[](activeCampaignsCount);
+        uint256 activeIndex = 0;
+
+        // Iterate through all campaigns and populate the activeCampaigns array
+        for (uint256 i = 0; i < numberOfCampaigns; i++) {
+            Campaign storage campaign = campaigns[i];
+
+            if (campaign.active && campaign.deadline > block.timestamp) {
+                activeCampaigns[activeIndex] = campaign;
+                activeIndex++;
             }
         }
 
@@ -86,16 +121,29 @@ contract FundIt is IFundIt, FundItStorage, Ownable {
     }
 
     // Function to list ended campaigns
-    function getEndedCampaigns() external override returns (Campaign[] memory) {
-        Campaign[] memory endedCampaigns = new Campaign[](numberOfCampaigns);
+    function getEndedCampaigns() external view override returns (Campaign[] memory) {
         uint256 endedCampaignsCount = 0;
 
+        // Count ended campaigns
         for (uint256 i = 0; i < numberOfCampaigns; i++) {
             Campaign storage campaign = campaigns[i];
 
             if (!campaign.active || campaign.deadline <= block.timestamp) {
-                endedCampaigns[endedCampaignsCount] = campaign;
                 endedCampaignsCount++;
+            }
+        }
+
+        // Create a new dynamic array to store ended campaigns
+        Campaign[] memory endedCampaigns = new Campaign[](endedCampaignsCount);
+        uint256 endedIndex = 0;
+
+        // Iterate through all campaigns and populate the endedCampaigns array
+        for (uint256 i = 0; i < numberOfCampaigns; i++) {
+            Campaign storage campaign = campaigns[i];
+
+            if (!campaign.active || campaign.deadline <= block.timestamp) {
+                endedCampaigns[endedIndex] = campaign;
+                endedIndex++;
             }
         }
 
@@ -103,14 +151,17 @@ contract FundIt is IFundIt, FundItStorage, Ownable {
     }
 
     // Function to end a campaign
-    function endCampaign(uint256 _id) external override campaignExists(_id) {
+    function endCampaign(uint256 _id) external override nonReentrant campaignExists(_id) {
         Campaign storage campaign = campaigns[_id];
 
+        // Validation check
         require(campaign.active, "Campaign is not active");
         require(campaign.owner == msg.sender, "You are not the campaign owner");
 
+        // Set the campaign as inactive
         campaign.active = false;
 
+        // Emit the CampaignEnded event
         emit CampaignEnded(_id, msg.sender);
     }
 }

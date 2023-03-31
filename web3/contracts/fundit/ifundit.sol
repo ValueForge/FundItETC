@@ -25,11 +25,11 @@ interface IFundIt {
 
     function donateToCampaign(uint256 _id) external payable;
 
-    function getCampaignDonors(uint256 _id) external returns (address[] memory, uint256[] memory);
+    function getCampaignDonors(uint256 _id) external view returns (address[] memory, uint256[] memory);
 
-    function getActiveCampaigns() external returns (Campaign[] memory);
+    function getActiveCampaigns() external view returns (Campaign[] memory);
 
-    function getEndedCampaigns() external returns (Campaign[] memory);
+    function getEndedCampaigns() external view returns (Campaign[] memory);
 
     function endCampaign(uint256 _id) external;
 }
