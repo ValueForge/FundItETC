@@ -14,8 +14,6 @@ contract FundIt is IFundIt {
         address[] donors;
         uint256[] donations;
         bool active;
-    } external override {
-
     }
 
     mapping(uint256 => Campaign) public campaigns;
