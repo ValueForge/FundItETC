@@ -3,9 +3,10 @@ pragma solidity ^0.8.9;
 
 import "./ifundit.sol";
 import "./funditproxy.sol";
+import "./funditstorage.sol";
 
 
-contract FundIt is IFundIt, FundItProxy {
+contract FundIt is IFundIt, FundItProxy, FundItStorage {
     struct Campaign {
         address payable owner;
         string title;
