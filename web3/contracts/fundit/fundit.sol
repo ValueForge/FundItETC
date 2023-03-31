@@ -1,14 +1,18 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "./ifundit.sol";
 import "./funditstorage.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
+contract FundIt is IFundIt, FundItStorage, Ownable {
+    event CampaignCreated(uint256 indexed campaignId, address indexed owner, string title, uint256 target);
+    event CampaignDonation(uint256 indexed campaignId, address indexed donor, uint256 amount);
+    event CampaignEnded(uint256 indexed campaignId, address indexed owner);
 
-contract FundIt is IFundIt, Initializable, FundItStorage {
-    function initialize() public initializer {
-        numberOfCampaigns = 0;
+    modifier campaignExists(uint256 _id) {
+        require(_id < numberOfCampaigns, "Campaign does not exist");
+        _;
     }
 
     // Function to create a new campaign
@@ -18,7 +22,7 @@ contract FundIt is IFundIt, Initializable, FundItStorage {
         uint256 _target,
         uint256 _duration,
         string memory _image
-    ) external override {
+    ) external override onlyOwner {
         require(bytes(_title).length > 0, "Title is required");
         require(bytes(_description).length > 0, "Description is required");
         require(_target > 0, "Target amount must be greater than 0");
@@ -34,11 +38,12 @@ contract FundIt is IFundIt, Initializable, FundItStorage {
         campaign.image = _image;
         campaign.active = true;
 
+        emit CampaignCreated(numberOfCampaigns, msg.sender, _title, _target);
         numberOfCampaigns++;
     }
 
     // Function to process donations to a campaign
-    function donateToCampaign(uint256 _id) external payable override {
+    function donateToCampaign(uint256 _id) external payable override campaignExists(_id) {
         require(msg.value > 0, "Donation amount must be greater than 0");
 
         Campaign storage campaign = campaigns[_id];
@@ -52,6 +57,8 @@ contract FundIt is IFundIt, Initializable, FundItStorage {
         campaign.donations.push(msg.value);
     
         campaign.amountCollected += msg.value;
+
+        emit CampaignDonation(_id, msg.sender, msg.value);
     }
 
     // Function to list donors to a campaign
@@ -96,12 +103,14 @@ contract FundIt is IFundIt, Initializable, FundItStorage {
     }
 
     // Function to end a campaign
-    function endCampaign(uint256 _id) external override {
+    function endCampaign(uint256 _id) external override campaignExists(_id) {
         Campaign storage campaign = campaigns[_id];
 
         require(campaign.active, "Campaign is not active");
         require(campaign.owner == msg.sender, "You are not the campaign owner");
 
         campaign.active = false;
+
+        emit CampaignEnded(_id, msg.sender);
     }
 }
