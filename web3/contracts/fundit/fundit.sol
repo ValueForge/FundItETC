@@ -1,28 +1,15 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "./ifundit.sol";
-import "./funditproxy.sol";
 import "./funditstorage.sol";
 
 
-contract FundIt is IFundIt, FundItProxy, FundItStorage {
-    struct Campaign {
-        address payable owner;
-        string title;
-        string description;
-        uint256 target;
-        uint256 deadline;
-        uint256 amountCollected;
-        string image;
-        address[] donors;
-        uint256[] donations;
-        bool active;
+contract FundIt is IFundIt, Initializable, FundItStorage {
+    function initialize() public initializer {
+        numberOfCampaigns = 0;
     }
-
-    mapping(uint256 => Campaign) public campaigns;
-
-    uint256 public numberOfCampaigns = 0;
 
     // Function to create a new campaign
     function createCampaign(
