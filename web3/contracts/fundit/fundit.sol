@@ -82,6 +82,11 @@ contract FundIt is IFundIt, FundItStorage, ReentrancyGuard {
         emit DonationMade(_id, msg.sender, msg.value);
     }
 
+    // Function to receive and revert direct payments to contract
+    receive() external payable {
+        revert("FundIt does not accept direct payments");
+    }
+
     // Function to list donors to a campaign
     function getCampaignDonors(uint256 _id) external view override campaignExists(_id) returns (address[] memory, uint256[] memory) {
         Campaign storage campaign = campaigns[_id];
