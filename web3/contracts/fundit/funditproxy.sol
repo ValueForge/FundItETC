@@ -33,6 +33,10 @@ contract FundItProxy is Ownable {
         }
     }
 
+    receive() external payable {
+        revert("FundItProxy does not accept direct payments");
+    }
+
     function upgradeTo(address newImplementation) external onlyOwner {
         require(newImplementation != address(0), "New implementation address cannot be zero");
         _implementation = newImplementation;
