@@ -2,7 +2,7 @@
 pragma solidity ^0.8.9;
 
 interface IFundIt {
-    uint256 MAX_DURATION = 180 days;
+    uint256 MAX_DURATION = 15552000;
     
     struct Campaign {
         address payable owner;
@@ -34,4 +34,6 @@ interface IFundIt {
     function getEndedCampaigns() external view returns (Campaign[] memory);
 
     function endCampaign(uint256 _id) external;
+
+    function withdraw(uint256 _id) external;
 }

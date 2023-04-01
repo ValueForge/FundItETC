@@ -20,6 +20,9 @@ contract FundIt is IFundIt, FundItStorage, ReentrancyGuard {
     // Event emitted when a campaign is ended by its owner
     event CampaignEnded(uint256 indexed campaignId, address indexed owner);
 
+    // Event emitted when a campaign owner withdraws funds
+    event Withdrawn(uint256 indexed campaignId, address indexed owner, uint256 amount); 
+
     // Modifier to check if a campaign with the given ID exists
     modifier campaignExists(uint256 _id) {
         require(_id < numberOfCampaigns, "Campaign does not exist");
@@ -68,9 +71,6 @@ contract FundIt is IFundIt, FundItStorage, ReentrancyGuard {
 
         require(campaign.active, "Campaign is not active");
         require(campaign.deadline > block.timestamp, "Campaign has ended");
-
-        // Transfer the donated amount to the campaign owner
-        campaign.owner.transfer(msg.value);
 
         // Update the campaign's donors and donations arrays
         campaign.donors.push(msg.sender);
@@ -162,11 +162,36 @@ contract FundIt is IFundIt, FundItStorage, ReentrancyGuard {
         // Validation check
         require(campaign.active, "Campaign is not active");
         require(campaign.owner == msg.sender, "You are not the campaign owner");
+        require(campaign.amountCollected == 0, "The collected funds have not been withdrawn yet!");
 
         // Set the campaign as inactive
         campaign.active = false;
 
         // Emit the CampaignEnded event
+        emit CampaignEnded(_id, msg.sender);
+    }
+
+    // Function to withdraw funds donated to campaign owner (ends campaign)
+    function withdraw(uint256 campaignId) external override nonReentrant {
+        Campaign storage campaign = campaigns[campaignId];
+
+        // Validation checks
+        require(campaign.owner == msg.sender, "Only the campaign owner can withdraw funds");
+        require(campaign.amountCollected >= campaign.target, "Funds can only be withdrawn if the campaign reached its target");
+        require(block.timestamp >= campaign.deadline, "Funds can only be withdrawn after the deadline");
+        require(campaign.active, "The campaign must be active");
+        
+        // Prepare withdrwal amount, close campaign
+        uint256 amount = campaign.amountCollected;
+        campaign.amountCollected = 0;
+        campaign.active = false;
+        
+        // Send donated funds to campaign owner
+        (bool success, ) = campaign.owner.call{value: amount}("");
+        require(success, "Withdrawal failed");
+        
+        // Emit the Withdrawn and CampaignEnded events
+        emit Withdrawn(_id, msg.sender, amount);
         emit CampaignEnded(_id, msg.sender);
     }
 }

@@ -17,7 +17,7 @@ Here are the changes and explanations from the original JSMastery project:
 ### Solidity
 
 - Changed the Solidity version pragma to `^0.8.9`, which allows for minor version updates to Solidity 0.8.
-- Added a `payable` modifier to the `owner` field in the `Campaign` struct to indicate that the owner can receive ether.
+- Added a `payable` modifier to the `owner` field in the `e that the owner can receive ether.
 - Added a `active` field to the `Campaign` struct to indicate if the campaign is still active or has ended.
 - Removed the return value of the `createCampaign` function since it was not being used.
 - Added more input validation to the `createCampaign` function to ensure that required fields are not empty and values are greater than 0.
@@ -42,3 +42,6 @@ Here are the changes and explanations from the original JSMastery project:
 - Added function to receive and revert direct payment to the `FundIt` and `FundItProxy` contracts.
 - Changed the `createCampaign` function to cap campaign duration at 180 days.
 - Changed the `createCampaign` function to use `calldata` instead of `memory` for gas efficiency.
+- Changed the `donateToCampaign` function to allow donated funds to accumulate in the contract.
+- Added `withdrawFunds` function to allow the campaign owner to withdraw funds from the contract.
+- Added `CampaignCreated`, `DonationMade`, `CampaignEnded`, and `Withdrawn` events to track state changes.
