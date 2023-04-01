@@ -28,17 +28,18 @@ contract FundIt is IFundIt, FundItStorage, ReentrancyGuard {
 
     // Function to create a new campaign
     function createCampaign(
-        string memory _title,
-        string memory _description,
+        string calldata _title,
+        string calldata _description,
         uint256 _target,
         uint256 _duration,
-        string memory _image
+        string calldata _image
     ) external override nonReentrant {
         // Validation checks
         require(bytes(_title).length > 0, "Title is required");
         require(bytes(_description).length > 0, "Description is required");
         require(_target > 0, "Target amount must be greater than 0");
         require(_duration > 0, "Campaign duration must be greater than 0");
+        require(_duration <= IFundIt.MAX_DURATION, "Campaign duration exceeds maximum limit");
 
         // Create a new campaign and store it in the campaigns mapping
         Campaign storage campaign = campaigns[numberOfCampaigns];

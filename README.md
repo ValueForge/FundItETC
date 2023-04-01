@@ -38,4 +38,7 @@ Here are the changes and explanations from the original JSMastery project:
 - Renamed contracts using MixedCase to `FundIt`, `IFundIt`, and `FundItProxy`.
 - Added `FundItStorage` contract to separate logic from storage.
 - Added annotations to the `FundIt` contract to explain the functions and variables.
-- Added import of OpenZeppelin library's `Ownable`, `ReentrancyGuard`, and `SafeMath` contracts
+- Added import of OpenZeppelin library's `Ownable`, `ReentrancyGuard`, and `SafeMath` contracts.
+- Added function to receive and revert direct payment to the `FundIt` and `FundItProxy` contracts.
+- Changed the `createCampaign` function to cap campaign duration at 180 days.
+- Changed the `createCampaign` function to use `calldata` instead of `memory` for gas efficiency.

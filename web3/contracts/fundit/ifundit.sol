@@ -2,6 +2,8 @@
 pragma solidity ^0.8.9;
 
 interface IFundIt {
+    uint256 MAX_DURATION = 180 days;
+    
     struct Campaign {
         address payable owner;
         string title;
