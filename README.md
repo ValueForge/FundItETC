@@ -2,7 +2,7 @@
 
 FundItETC is an open-source, decentralized crowd funding platform in development for deployment on Ethereum Classic.
 
-It is an expansion on a JSMastery educational project by [Adrian Hajdin](https:\\jsmastery.pro) to whom we express sincere gratitude.
+It is inspired by a JSMastery educational project by [Adrian Hajdin](https:\\jsmastery.pro) to whom we express sincere gratitude.
 
 ## Development environment
 
@@ -38,3 +38,4 @@ Here are the changes and explanations from the original JSMastery project:
 - Renamed contracts using MixedCase to `FundIt`, `IFundIt`, and `FundItProxy`.
 - Added `FundItStorage` contract to separate logic from storage.
 - Added annotations to the `FundIt` contract to explain the functions and variables.
+- Added import of OpenZeppelin library's `Ownable`, `ReentrancyGuard`, and `SafeMath` contracts
