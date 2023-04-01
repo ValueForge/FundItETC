@@ -4,12 +4,11 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "./IFundIt.sol";
-import "./FundItProxy.sol";
 import "./FundItStorage.sol";
 
 
 // The FundIt contract inherits from IFundIt, FundItProxy, FundItStorage, and ReentrancyGuard
-contract FundIt is IFundIt, FundItProxy, FundItStorage, ReentrancyGuard {
+contract FundIt is IFundIt, FundItStorage, ReentrancyGuard {
     using SafeMath for uint256;
 
     // Event emitted when a new campaign is created
