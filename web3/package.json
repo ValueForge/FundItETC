@@ -12,5 +12,8 @@
     "@openzeppelin/contracts": "^4.8.2",
     "@thirdweb-dev/contracts": "^3",
     "dotenv": "^16.0.3"
+  },
+  "engines": {
+    "node": "18.15.0"
   }
 }
