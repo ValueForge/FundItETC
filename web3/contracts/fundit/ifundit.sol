@@ -35,5 +35,5 @@ interface IFundIt {
 
     function endCampaign(uint256 _id) external;
 
-    function withdraw(uint256 _id) external;
+    function withdrawFunds(uint256 _id) external;
 }

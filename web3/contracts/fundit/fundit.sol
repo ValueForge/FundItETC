@@ -172,8 +172,8 @@ contract FundIt is IFundIt, FundItStorage, ReentrancyGuard {
     }
 
     // Function to withdraw funds donated to campaign owner (ends campaign)
-    function withdraw(uint256 campaignId) external override nonReentrant {
-        Campaign storage campaign = campaigns[campaignId];
+    function withdrawFunds(uint256 _id) external override nonReentrant {
+        Campaign storage campaign = campaigns[_id];
 
         // Validation checks
         require(campaign.owner == msg.sender, "Only the campaign owner can withdraw funds");
