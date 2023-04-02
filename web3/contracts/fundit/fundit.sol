@@ -1,14 +1,16 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/ContextUpgradeable.sol";
 import "./IFundIt.sol";
 import "./FundItStorage.sol";
 
 
-// The FundIt contract inherits from IFundIt, FundItProxy, FundItStorage, and ReentrancyGuard
-contract FundIt is IFundIt, FundItStorage, ReentrancyGuard {
+// The FundIt contract inherits from IFundIt, FundItStorage, ContextUpgradeable, Initializable, and ReentrancyGuardUpgradeable
+contract FundIt is IFundIt, FundItStorage, Initializable, ContextUpgradeable, ReentrancyGuardUpgradeable {
     using SafeMath for uint256;
 
     // Variable declaration to cap campaign duration at 180 days
@@ -32,6 +34,11 @@ contract FundIt is IFundIt, FundItStorage, ReentrancyGuard {
         _;
     }
 
+    // Function to initialize contract state
+    function initialize() public initializer {
+        __ReentrancyGuard_init();
+        __Context_init();
+    }
     // Function to create a new campaign
     function createCampaign(
         string calldata _title,
