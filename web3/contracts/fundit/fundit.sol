@@ -14,7 +14,7 @@ contract FundIt is IFundIt, FundItStorage, Initializable, ContextUpgradeable, Re
     using SafeMath for uint256;
 
     // Variable declaration to cap campaign duration at 180 days
-    uint256 MAX_DURATION = 15552000;
+    uint256 public constant MAX_DURATION = 15552000;
 
     // Event emitted when a new campaign is created
     event CampaignCreated(uint256 indexed campaignId, address indexed owner);
