@@ -1,45 +1,16 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.9;
+pragma solidity 0.8.9;
 
+import "@openzeppelin/contracts-upgradeable/proxy/transparent/TransparentUpgradeableProxy.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "./IFundIt.sol";
 
-
-contract FundItProxy is Ownable {
-    address private _implementation;
-
+contract FundItProxy is TransparentUpgradeableProxy, Ownable {
     event ImplementationUpdated(address indexed newImplementation);
 
-    constructor(address implementation_) {
-        _implementation = implementation_;
-    }
-
-    fallback() external payable {
-        address implementation = _implementation;
-        assembly {
-            let ptr := mload(0x40)
-            calldatacopy(ptr, 0, calldatasize())
-            let result := delegatecall(gas(), implementation, ptr, calldatasize(), 0, 0)
-            let size := returndatasize()
-            returndatacopy(ptr, 0, size)
-
-            switch result
-            case 0 {
-                revert(ptr, size)
-            }
-            default {
-                return(ptr, size)
-            }
-        }
-    }
-
-    receive() external payable {
-        revert("FundItProxy does not accept direct payments");
-    }
-
-    function upgradeTo(address newImplementation) external onlyOwner {
-        require(newImplementation != address(0), "New implementation address cannot be zero");
-        _implementation = newImplementation;
-        emit ImplementationUpdated(newImplementation);
+    constructor(
+        address _logic,
+        address _admin,
+        bytes memory _data
+    ) TransparentUpgradeableProxy(_logic, _admin, _data) {
     }
 }
