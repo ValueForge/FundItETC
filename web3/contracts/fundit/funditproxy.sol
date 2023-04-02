@@ -2,9 +2,9 @@
 pragma solidity 0.8.9;
 
 import "@openzeppelin/contracts-upgradeable/proxy/transparent/TransparentUpgradeableProxy.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-contract FundItProxy is TransparentUpgradeableProxy, Ownable {
+contract FundItProxy is TransparentUpgradeableProxy, OwnableUpgradeable {
     event ImplementationUpdated(address indexed newImplementation);
 
     constructor(
