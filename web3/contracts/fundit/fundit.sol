@@ -7,12 +7,12 @@ import "./IFundIt.sol";
 import "./FundItStorage.sol";
 
 
-// The FundIt contract inherits from IFundIt, FundItProxy, FundItStorage, and ReentrancyGuard
+// The FundIt contract inherits from IFundIt, FundItStorage, and ReentrancyGuard
 contract FundIt is IFundIt, FundItStorage, ReentrancyGuard {
     using SafeMath for uint256;
 
     // Variable declaration to cap campaign duration at 180 days
-    uint256 MAX_DURATION = 15552000;
+    uint256 maxDuration = 15552000;
 
     // Event emitted when a new campaign is created
     event CampaignCreated(uint256 indexed campaignId, address indexed owner);
@@ -45,7 +45,7 @@ contract FundIt is IFundIt, FundItStorage, ReentrancyGuard {
         require(bytes(_description).length > 0, "Description is required");
         require(_target > 0, "Target amount must be greater than 0");
         require(_duration > 0, "Campaign duration must be greater than 0");
-        require(_duration <= MAX_DURATION, "Campaign duration exceeds maximum limit");
+        require(_duration <= maxDuration, "Campaign duration exceeds maximum limit");
 
         // Create a new campaign and store it in the campaigns mapping
         Campaign storage campaign = campaigns[numberOfCampaigns];
