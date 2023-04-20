@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.9;
+pragma solidity 0.8.9;
 
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import "./IFundIt.sol";
 import "./FundItStorage.sol";
 
@@ -32,6 +34,11 @@ contract FundIt is IFundIt, FundItStorage, ReentrancyGuard {
         _;
     }
 
+    // Function to initialize contract state
+    function initialize() public initializer {
+        __ReentrancyGuard_init();
+        __Context_init();
+    }
     // Function to create a new campaign
     function createCampaign(string calldata _title, string calldata _description, uint256 _target, uint256 _duration, string calldata _image
         ) external override nonReentrant {
