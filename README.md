@@ -21,7 +21,7 @@ Here are the changes and explanations from the original JSMastery project:
 ### Solidity
 
 - Changed the Solidity version pragma to `^0.8.9`, which allows for minor version updates to Solidity 0.8.
-- Added a `payable` modifier to the `owner` field in the `e that the owner can receive ether.
+- Added a `payable` modifier to the `owner` field in the `Campaign` struct to indicate that the owner can receive ether.
 - Added a `active` field to the `Campaign` struct to indicate if the campaign is still active or has ended.
 - Removed the return value of the `createCampaign` function since it was not being used.
 - Added more input validation to the `createCampaign` function to ensure that required fields are not empty and values are greater than 0.

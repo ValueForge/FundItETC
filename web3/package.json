@@ -12,7 +12,7 @@
     "hardhat": "^2.10.1"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^4.8.2",
+    "@openzeppelin/contracts-upgradeable": "^4.8.3",
     "@thirdweb-dev/contracts": "^3",
     "dotenv": "^16.0.3"
   },
