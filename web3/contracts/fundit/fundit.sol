@@ -1,16 +1,20 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.9;
+pragma solidity 0.8.9;
 
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import "./IFundIt.sol";
-import "./FundItProxy.sol";
 import "./FundItStorage.sol";
 
 
-// The FundIt contract inherits from IFundIt, FundItProxy, FundItStorage, and ReentrancyGuard
-contract FundIt is IFundIt, FundItProxy, FundItStorage, ReentrancyGuard {
+// The FundIt contract inherits from IFundIt, FundItStorage, and ReentrancyGuard
+contract FundIt is IFundIt, FundItStorage, ReentrancyGuard {
     using SafeMath for uint256;
+
+    // Variable declaration to cap campaign duration at 180 days
+    uint256 maxDuration = 15552000;
 
     // Event emitted when a new campaign is created
     event CampaignCreated(uint256 indexed campaignId, address indexed owner);
@@ -21,42 +25,45 @@ contract FundIt is IFundIt, FundItProxy, FundItStorage, ReentrancyGuard {
     // Event emitted when a campaign is ended by its owner
     event CampaignEnded(uint256 indexed campaignId, address indexed owner);
 
+    // Event emitted when a campaign owner withdraws funds
+    event Withdrawn(uint256 indexed campaignId, address indexed owner, uint256 amount); 
+
     // Modifier to check if a campaign with the given ID exists
     modifier campaignExists(uint256 _id) {
         require(_id < numberOfCampaigns, "Campaign does not exist");
         _;
     }
 
+    // Function to initialize contract state
+    function initialize() public initializer {
+        __ReentrancyGuard_init();
+        __Context_init();
+    }
     // Function to create a new campaign
-    function createCampaign(
-        string memory _title,
-        string memory _description,
-        uint256 _target,
-        uint256 _duration,
-        string memory _image
-    ) external override nonReentrant {
-        // Validation checks
-        require(bytes(_title).length > 0, "Title is required");
-        require(bytes(_description).length > 0, "Description is required");
-        require(_target > 0, "Target amount must be greater than 0");
-        require(_duration > 0, "Campaign duration must be greater than 0");
+    function createCampaign(string calldata _title, string calldata _description, uint256 _target, uint256 _duration, string calldata _image
+        ) external override nonReentrant {
+            // Validation checks
+            require(bytes(_title).length > 0, "Title is required");
+            require(bytes(_description).length > 0, "Description is required");
+            require(_target > 0, "Target amount must be greater than 0");
+            require(_duration > 0, "Campaign duration must be greater than 0");
+            require(_duration <= maxDuration, "Campaign duration exceeds maximum limit");
 
-        // Create a new campaign and store it in the campaigns mapping
-        Campaign storage campaign = campaigns[numberOfCampaigns];
-
-        campaign.owner = payable(msg.sender);
-        campaign.title = _title;
-        campaign.description = _description;
-        campaign.target = _target;
-        campaign.deadline = block.timestamp.add(_duration);
-        campaign.image = _image;
-        campaign.active = true;
-
-        // Emit the CampaignCreated event
-        emit CampaignCreated(numberOfCampaigns, msg.sender);
-
-        // Increment the numberOfCampaigns counter
-        numberOfCampaigns++;
+            // Create a new campaign and store it in the campaigns mapping
+            Campaign storage campaign = campaigns[numberOfCampaigns];
+            campaign.owner = payable(msg.sender);
+            campaign.title = _title;
+            campaign.description = _description;
+            campaign.target = _target;
+            campaign.deadline = block.timestamp.add(_duration * 24 * 60 * 60);
+            campaign.image = _image;
+            campaign.active = true;
+            
+            // Emit the CampaignCreated event
+            emit CampaignCreated(numberOfCampaigns, msg.sender);
+            
+            // Increment the numberOfCampaigns counter
+            numberOfCampaigns++;
     }
 
     // Function to process donations to a campaign
@@ -69,9 +76,6 @@ contract FundIt is IFundIt, FundItProxy, FundItStorage, ReentrancyGuard {
         require(campaign.active, "Campaign is not active");
         require(campaign.deadline > block.timestamp, "Campaign has ended");
 
-        // Transfer the donated amount to the campaign owner
-        campaign.owner.transfer(msg.value);
-
         // Update the campaign's donors and donations arrays
         campaign.donors.push(msg.sender);
         campaign.donations.push(msg.value);
@@ -81,6 +85,11 @@ contract FundIt is IFundIt, FundItProxy, FundItStorage, ReentrancyGuard {
 
         // Emit the DonationMade event
         emit DonationMade(_id, msg.sender, msg.value);
+    }
+
+    // Function to receive and revert direct payments to contract
+    receive() external payable {
+        revert("FundIt does not accept direct payments");
     }
 
     // Function to list donors to a campaign
@@ -157,11 +166,36 @@ contract FundIt is IFundIt, FundItProxy, FundItStorage, ReentrancyGuard {
         // Validation check
         require(campaign.active, "Campaign is not active");
         require(campaign.owner == msg.sender, "You are not the campaign owner");
+        require(campaign.amountCollected == 0, "The collected funds have not been withdrawn yet!");
 
         // Set the campaign as inactive
         campaign.active = false;
 
         // Emit the CampaignEnded event
+        emit CampaignEnded(_id, msg.sender);
+    }
+
+    // Function to withdraw funds donated to campaign owner (ends campaign)
+    function withdrawFunds(uint256 _id) external override nonReentrant {
+        Campaign storage campaign = campaigns[_id];
+
+        // Validation checks
+        require(campaign.owner == msg.sender, "Only the campaign owner can withdraw funds");
+        require(campaign.amountCollected >= campaign.target, "Funds can only be withdrawn if the campaign reached its target");
+        require(block.timestamp >= campaign.deadline, "Funds can only be withdrawn after the deadline");
+        require(campaign.active, "The campaign must be active");
+        
+        // Prepare withdrwal amount, close campaign
+        uint256 amount = campaign.amountCollected;
+        campaign.amountCollected = 0;
+        campaign.active = false;
+        
+        // Send donated funds to campaign owner
+        (bool success, ) = campaign.owner.call{value: amount}("");
+        require(success, "Withdrawal failed");
+        
+        // Emit the Withdrawn and CampaignEnded events
+        emit Withdrawn(_id, msg.sender, amount);
         emit CampaignEnded(_id, msg.sender);
     }
 }

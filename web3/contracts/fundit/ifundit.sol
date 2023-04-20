@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.9;
+pragma solidity 0.8.9;
 
 interface IFundIt {
     struct Campaign {
@@ -32,4 +32,6 @@ interface IFundIt {
     function getEndedCampaigns() external view returns (Campaign[] memory);
 
     function endCampaign(uint256 _id) external;
+
+    function withdrawFunds(uint256 _id) external;
 }

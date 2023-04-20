@@ -1,16 +1,22 @@
 {
-  "name": "hardhat-javascript-starter",
+  "name": "FundItETC",
+  "author": "Keith Hall Barnett",
+  "version": "0.0.1",
   "scripts": {
     "build": "npx thirdweb@latest detect",
     "deploy": "npx thirdweb@latest deploy",
     "release": "npx thirdweb@latest release"
   },
   "devDependencies": {
+    "@openzeppelin/hardhat-upgrades": "^1.22.1",
     "hardhat": "^2.10.1"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^4.8.2",
+    "@openzeppelin/contracts-upgradeable": "^4.8.3",
     "@thirdweb-dev/contracts": "^3",
     "dotenv": "^16.0.3"
+  },
+  "engines": {
+    "node": "18.15.0"
   }
 }

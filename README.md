@@ -2,7 +2,11 @@
 
 FundItETC is an open-source, decentralized crowd funding platform in development for deployment on Ethereum Classic.
 
-It is an expansion on a JSMastery educational project by [Adrian Hajdin](https:\\jsmastery.pro) to whom we express sincere gratitude.
+It is inspired by a JSMastery educational project by [Adrian Hajdin](https:\\jsmastery.pro) to whom we express sincere gratitude.
+
+In the spirit of the open-source development community and in keeping with the Ethereum Classic Foundation, this project is available to the ETC community for review and feedback. Your input and suggestions are welcome and encouraged. Please submit your feedback via the Issues tab.
+
+We need your help! If you are interested in contributing to this or any of the upcoming ValueForge projects, please see [here](https://github.com/ValueForge/FundItETC/issues/3).
 
 ## Development environment
 
@@ -38,3 +42,11 @@ Here are the changes and explanations from the original JSMastery project:
 - Renamed contracts using MixedCase to `FundIt`, `IFundIt`, and `FundItProxy`.
 - Added `FundItStorage` contract to separate logic from storage.
 - Added annotations to the `FundIt` contract to explain the functions and variables.
+- Added import of OpenZeppelin library's `Ownable`, `ReentrancyGuard`, and `SafeMath` contracts.
+- Added function to receive and revert direct payment to the `FundIt` and `FundItProxy` contracts.
+- Changed the `createCampaign` function to cap campaign duration at 180 days.
+- Changed the `createCampaign` function to use `calldata` instead of `memory` for gas efficiency.
+- Changed the `donateToCampaign` function to allow donated funds to accumulate in the contract.
+- Added `withdrawFunds` function to allow the campaign owner to withdraw funds from the contract.
+- Added `CampaignCreated`, `DonationMade`, `CampaignEnded`, and `Withdrawn` events to track state changes.
+- Set the maximum number of days a campaigtn may run at 180 days.
