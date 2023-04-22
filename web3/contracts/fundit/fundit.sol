@@ -1,17 +1,16 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MPL-2.0 license
 pragma solidity 0.8.9;
 
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import "./IFundIt.sol";
 import "./FundItStorage.sol";
 
 
-// The FundIt contract inherits from IFundIt, FundItStorage, and ReentrancyGuard
+// The FundIt contract inherits from IFundIt, FundItStorage, and ReentrancyGuardUpgradeable
 contract FundIt is IFundIt, FundItStorage, ReentrancyGuard {
-    using SafeMath for uint256;
+    using SafeMathUpgradeable for uint256;
 
     // Variable declaration to cap campaign duration at 180 days
     uint256 maxDuration = 15552000;

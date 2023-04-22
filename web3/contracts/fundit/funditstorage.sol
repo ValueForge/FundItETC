@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MPL-2.0 license
 pragma solidity 0.8.9;
 
 import "./IFundIt.sol";
