@@ -49,4 +49,4 @@ Here are the changes and explanations from the original JSMastery project:
 - Changed the `donateToCampaign` function to allow donated funds to accumulate in the contract.
 - Added `withdrawFunds` function to allow the campaign owner to withdraw funds from the contract.
 - Added `CampaignCreated`, `DonationMade`, `CampaignEnded`, and `Withdrawn` events to track state changes.
-- Set the maximum number of days a campaigtn may run at 180 days.
+- Set the maximum number of days a campaign may run at 180 days.
