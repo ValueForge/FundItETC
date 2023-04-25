@@ -1,17 +1,29 @@
 // SPDX-License-Identifier: MPL-2.0 license
 pragma solidity 0.8.9;
 
-import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "./IFundIt.sol";
 import "./FundItStorage.sol";
+import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 
+/// @custom:security-contact app.valueforge@gmail.com
 
-// The FundIt contract inherits from IFundIt, FundItStorage, and ReentrancyGuardUpgradeable
-contract FundIt is IFundIt, FundItStorage, ReentrancyGuard {
+// The FundIt contract inherits from IFundIt, FundItStorage, PausableUpgradeable,
+// OwnableUpgradeable, Initializable, ReentrancyGuardUpgradeable 
+// and uses SafeMathUpgradeable library
+contract FundIt is IFundIt, FundItStorage,
+PausableUpgradeable, OwnableUpgradeable,
+Initializable, ReentrancyGuardUpgradeable {
     using SafeMathUpgradeable for uint256;
 
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor {
+        _disableInitializers() internal;
+        }
+    
     // Variable declaration to cap campaign duration at 180 days
     uint256 maxDuration = 15552000;
 
@@ -31,17 +43,24 @@ contract FundIt is IFundIt, FundItStorage, ReentrancyGuard {
     modifier campaignExists(uint256 _id) {
         require(_id < numberOfCampaigns, "Campaign does not exist");
         _;
-    }
+        }
 
     // Function to initialize contract state
-    function initialize() public initializer {
-        __ReentrancyGuard_init();
-        __Context_init();
+    function initialize() initializer internal {
+        __Pausable_init();
+        __Ownable_init();
     }
+    
     // Function to create a new campaign
-    function createCampaign(string calldata _title, string calldata _description, uint256 _target, uint256 _duration, string calldata _image
+    function createCampaign(
+        string calldata _title,
+        string calldata _description,
+        uint256 _target,
+        uint256 _duration,
+        string calldata _image
         ) external override nonReentrant {
-            // Validation checks
+            
+             // Validation checks
             require(bytes(_title).length > 0, "Title is required");
             require(bytes(_description).length > 0, "Description is required");
             require(_target > 0, "Target amount must be greater than 0");
@@ -54,7 +73,7 @@ contract FundIt is IFundIt, FundItStorage, ReentrancyGuard {
             campaign.title = _title;
             campaign.description = _description;
             campaign.target = _target;
-            campaign.deadline = block.timestamp.add(_duration * 24 * 60 * 60);
+            campaign.deadline = block.timestamp.add(_duration.mul(24 * 60 * 60));
             campaign.image = _image;
             campaign.active = true;
             
@@ -92,7 +111,9 @@ contract FundIt is IFundIt, FundItStorage, ReentrancyGuard {
     }
 
     // Function to list donors to a campaign
-    function getCampaignDonors(uint256 _id) external view override campaignExists(_id) returns (address[] memory, uint256[] memory) {
+    function getCampaignDonors(uint256 _id)
+    external view override campaignExists(_id)
+    returns (address[] memory, uint256[] memory) {
         Campaign storage campaign = campaigns[_id];
 
         return (campaign.donors, campaign.donations);
@@ -178,20 +199,22 @@ contract FundIt is IFundIt, FundItStorage, ReentrancyGuard {
     function withdrawFunds(uint256 _id) external override nonReentrant {
         Campaign storage campaign = campaigns[_id];
 
-        // Validation checks
+        // Validation checks -- Uncomment to activate
         require(campaign.owner == msg.sender, "Only the campaign owner can withdraw funds");
-        require(campaign.amountCollected >= campaign.target, "Funds can only be withdrawn if the campaign reached its target");
-        require(block.timestamp >= campaign.deadline, "Funds can only be withdrawn after the deadline");
-        require(campaign.active, "The campaign must be active");
+        // require(campaign.amountCollected >= campaign.target, "Funds can only be withdrawn if the campaign reached its target");
+        // require(block.timestamp >= campaign.deadline, "Funds can only be withdrawn after the deadline");
+        // require(campaign.active, "The campaign must be active");
         
-        // Prepare withdrwal amount, close campaign
+        // Prepare withdrwal amount
         uint256 amount = campaign.amountCollected;
-        campaign.amountCollected = 0;
-        campaign.active = false;
         
         // Send donated funds to campaign owner
         (bool success, ) = campaign.owner.call{value: amount}("");
         require(success, "Withdrawal failed");
+
+        // Set the campaign as inactive
+        campaign.amountCollected = 0;
+        campaign.active = false;
         
         // Emit the Withdrawn and CampaignEnded events
         emit Withdrawn(_id, msg.sender, amount);
