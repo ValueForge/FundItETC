@@ -12,17 +12,15 @@ import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 /// @custom:security-contact app.valueforge@gmail.com
 
 // The FundIt contract inherits from IFundIt, FundItStorage, PausableUpgradeable,
-// OwnableUpgradeable, Initializable, ReentrancyGuardUpgradeable 
+// OwnableUpgradeable, Initializable, ReentrancyGuardUpgradeable contracts
 // and uses SafeMathUpgradeable library
-contract FundIt is IFundIt, FundItStorage,
-PausableUpgradeable, OwnableUpgradeable,
-Initializable, ReentrancyGuardUpgradeable {
+contract FundIt is IFundIt, FundItStorage, PausableUpgradeable, OwnableUpgradeable, Initializable, ReentrancyGuardUpgradeable {
     using SafeMathUpgradeable for uint256;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor {
-        _disableInitializers() internal;
-        }
+        _disableInitializers();
+    }
     
     // Variable declaration to cap campaign duration at 180 days
     uint256 maxDuration = 15552000;
@@ -49,6 +47,7 @@ Initializable, ReentrancyGuardUpgradeable {
     function initialize() initializer internal {
         __Pausable_init();
         __Ownable_init();
+        __ReentrancyGuard_init();
     }
     
     // Function to create a new campaign
@@ -219,5 +218,15 @@ Initializable, ReentrancyGuardUpgradeable {
         // Emit the Withdrawn and CampaignEnded events
         emit Withdrawn(_id, msg.sender, amount);
         emit CampaignEnded(_id, msg.sender);
+    }
+
+    // Function to pause the contract
+    function pause() external onlyOwner {
+        _pause();
+    }
+
+    // Function to unpause the contract
+    function unpause() external onlyOwner {
+        _unpause();
     }
 }
