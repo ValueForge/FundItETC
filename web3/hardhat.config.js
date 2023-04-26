@@ -9,11 +9,11 @@ module.exports = {
       hardhat: {},
       mordor: {
         url: 'https://geth-mordor.etc-network.info',
-        accounts: ['0x$(process.env.PRIVATE_KEY)']
+        accounts: [`0x${process.env.PRIVATE_KEY}`] 
       },
       classic: {
         url: 'https://etc.rivet.link',
-        accounts: ['0x$(process.env.PRIVATE_KEY)']
+        accounts: [`0x${process.env.PRIVATE_KEY}`]
       }
     },
     settings: {
