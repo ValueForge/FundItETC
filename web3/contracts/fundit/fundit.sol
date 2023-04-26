@@ -57,7 +57,7 @@ contract FundIt is IFundIt, FundItStorage, PausableUpgradeable, OwnableUpgradeab
         uint256 _target,
         uint256 _duration,
         string calldata _image
-        ) external override nonReentrant {
+        ) external override nonReentrant whenNotPaused {
             
              // Validation checks
             require(bytes(_title).length > 0, "Title is required");
@@ -84,7 +84,7 @@ contract FundIt is IFundIt, FundItStorage, PausableUpgradeable, OwnableUpgradeab
     }
 
     // Function to process donations to a campaign
-    function donateToCampaign(uint256 _id) external payable override nonReentrant campaignExists(_id) {
+    function donateToCampaign(uint256 _id) external payable override nonReentrant whenNotPaused campaignExists(_id) {
         // Validation checks
         require(msg.value > 0, "Donation amount must be greater than 0");
 
@@ -105,7 +105,7 @@ contract FundIt is IFundIt, FundItStorage, PausableUpgradeable, OwnableUpgradeab
     }
 
     // Function to receive and revert direct payments to contract
-    receive() external payable {
+    receive() external payable override {
         revert("FundIt does not accept direct payments");
     }
 
@@ -179,7 +179,7 @@ contract FundIt is IFundIt, FundItStorage, PausableUpgradeable, OwnableUpgradeab
     }
 
     // Function to end a campaign
-    function endCampaign(uint256 _id) external override nonReentrant campaignExists(_id) {
+    function endCampaign(uint256 _id) external override nonReentrant whenNotPaused campaignExists(_id) {
         Campaign storage campaign = campaigns[_id];
 
         // Validation check
@@ -195,16 +195,16 @@ contract FundIt is IFundIt, FundItStorage, PausableUpgradeable, OwnableUpgradeab
     }
 
     // Function to withdraw funds donated to campaign owner (ends campaign)
-    function withdrawFunds(uint256 _id) external override nonReentrant {
+    function withdrawFunds(uint256 _id) external override nonReentrant whenNotPaused {
         Campaign storage campaign = campaigns[_id];
 
         // Validation checks -- Uncomment to activate
         require(campaign.owner == msg.sender, "Only the campaign owner can withdraw funds");
         // require(campaign.amountCollected >= campaign.target, "Funds can only be withdrawn if the campaign reached its target");
-        // require(block.timestamp >= campaign.deadline, "Funds can only be withdrawn after the deadline");
+        require(block.timestamp >= campaign.deadline, "Funds can only be withdrawn after the deadline");
         // require(campaign.active, "The campaign must be active");
         
-        // Prepare withdrwal amount
+        // Prepare withdrawal amount
         uint256 amount = campaign.amountCollected;
         
         // Send donated funds to campaign owner
