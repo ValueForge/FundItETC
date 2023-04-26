@@ -137,4 +137,4 @@ describe("FundIt", function () {
         .to.be.revertedWith("Donation amount must be greater than 0");
     });
   });
-  
+})});
