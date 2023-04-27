@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MPL-2.0 license
 pragma solidity 0.8.9;
 
-import "@openzeppelin/contracts-upgradeable/proxy/transparent/TransparentUpgradeableProxy.sol";
+import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 contract FundItProxy is TransparentUpgradeableProxy, OwnableUpgradeable {
