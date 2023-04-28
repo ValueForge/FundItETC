@@ -3,9 +3,9 @@ pragma solidity 0.8.9;
 
 import "./IFundIt.sol";
 import "./FundItStorage.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 
@@ -14,11 +14,12 @@ import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 // The FundIt contract inherits from IFundIt, FundItStorage, PausableUpgradeable,
 // OwnableUpgradeable, Initializable, ReentrancyGuardUpgradeable contracts
 // and uses SafeMathUpgradeable library
-contract FundIt is IFundIt, FundItStorage, PausableUpgradeable, OwnableUpgradeable, Initializable, ReentrancyGuardUpgradeable {
+contract FundIt is IFundIt, FundItStorage, Initializable, PausableUpgradeable,
+OwnableUpgradeable, ReentrancyGuardUpgradeable {
     using SafeMathUpgradeable for uint256;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor {
+    constructor () initializer {
         _disableInitializers();
     }
     
@@ -84,7 +85,8 @@ contract FundIt is IFundIt, FundItStorage, PausableUpgradeable, OwnableUpgradeab
     }
 
     // Function to process donations to a campaign
-    function donateToCampaign(uint256 _id) external payable override nonReentrant whenNotPaused campaignExists(_id) {
+    function donateToCampaign(uint256 _id) external payable override
+    nonReentrant whenNotPaused campaignExists(_id) {
         // Validation checks
         require(msg.value > 0, "Donation amount must be greater than 0");
 
@@ -105,7 +107,7 @@ contract FundIt is IFundIt, FundItStorage, PausableUpgradeable, OwnableUpgradeab
     }
 
     // Function to receive and revert direct payments to contract
-    receive() external payable override {
+    receive() external payable {
         revert("FundIt does not accept direct payments");
     }
 
@@ -179,7 +181,7 @@ contract FundIt is IFundIt, FundItStorage, PausableUpgradeable, OwnableUpgradeab
     }
 
     // Function to end a campaign
-    function endCampaign(uint256 _id) external override nonReentrant whenNotPaused campaignExists(_id) {
+    function endCampaign(uint256 _id) external override nonReentrant whenNotPaused campaignExists(_id) { 
         Campaign storage campaign = campaigns[_id];
 
         // Validation check
@@ -195,7 +197,7 @@ contract FundIt is IFundIt, FundItStorage, PausableUpgradeable, OwnableUpgradeab
     }
 
     // Function to withdraw funds donated to campaign owner (ends campaign)
-    function withdrawFunds(uint256 _id) external override nonReentrant whenNotPaused {
+    function withdrawFunds(uint256 _id) external override nonReentrant whenNotPaused  {
         Campaign storage campaign = campaigns[_id];
 
         // Validation checks -- Uncomment to activate
