@@ -1,5 +1,5 @@
 const { expect } = require("chai");
-const { loadFixture } = require("hardhat-toolkit");
+const { loadFixture } = require("@nomicfoundation/hardhat-network-helpers");
 
 describe("FundIt", function () {
   let FundIt, fundIt, FundItProxy, fundItProxy, FundItStorage, fundItStorage, IFundIt, ifundit, owner, addr1, addr2;
