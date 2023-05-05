@@ -12,7 +12,7 @@ If you are interested in contributing to this or any of the other upcoming Value
 
 ## Development environment
 
-The back-end for FundItETC is a suite of four Solidity smart contracts developed for deployment on the ETC network. It utilizes the OpenZeppelin Solidity contrat library, thirdweb's Web3 and HardHat frameworks.
+The back-end for FundItETC is a suite of four Solidity smart contracts developed for deployment on the ETC network. It utilizes the OpenZeppelin Solidity contract library, thirdweb's Web3 and HardHat frameworks.
 
 FundItETC will be accompanied by a JavaScript-based UI/UX application and HTML website which is expected to utilize the Tailwind CSS framework.
 
