@@ -1,5 +1,5 @@
 const { expect } = require("chai");
-const { loadFixture } = require("ethereum-waffle");
+const { loadFixture } = require("hardhat-toolkit");
 
 describe("FundIt", function () {
   let FundIt, fundIt, FundItProxy, fundItProxy, FundItStorage, fundItStorage, IFundIt, ifundit, owner, addr1, addr2;
