@@ -1,24 +1,26 @@
 # FundItETC
 
-FundItETC is an open-source, decentralized crowd funding platform in development for deployment on Ethereum Classic.
+FundItETC is an open-source, decentralized crowd funding platform under development for deployment on Ethereum Classic.
 
-It is inspired by a JSMastery educational project by [Adrian Hajdin](https:\\jsmastery.pro) to whom we express sincere gratitude.
+It was originally inspired by a JSMastery educational project by [Adrian Hajdin](https:\\jsmastery.pro) to whom we express sincere gratitude.
 
-In the spirit of the open-source development community and in keeping with the Ethereum Classic Foundation, this project is available to the ETC community for review and feedback. Your input and suggestions are welcome and encouraged. Please submit your feedback via the Issues tab.
+In the spirit of open-source project development and in keeping with the Ethereum Classic Foundational Principles, this project is openly available for review and feedback. Your input and suggestions are welcomed and encouraged. Please submit your feedback via repo the Issues tab.
 
-We need your help! If you are interested in contributing to this or any of the upcoming ValueForge projects, please see [here](https://github.com/ValueForge/FundItETC/issues/3).
+## We need your help!
+
+If you are interested in contributing to this or any of the other upcoming ValueForge projects, please see the information [here](https://github.com/ValueForge/FundItETC/issues/3).
 
 ## Development environment
 
-The back-end for FundItETC is a suite of four Solidity smart contracts developed for and deployed to the ETC network. It utilizes the OpenZeppelin Solidity library, thirdweb's Web3 and HardHat frameworks.
+The back-end for FundItETC is a suite of four Solidity smart contracts developed for deployment on the ETC network. It utilizes the OpenZeppelin Solidity contrat library, thirdweb's Web3 and HardHat frameworks.
 
-FundItETC will be accompanied by a JavaScript-based UI application and website which is expected to utilize the Tailwind CSS framework.
+FundItETC will be accompanied by a JavaScript-based UI/UX application and HTML website which is expected to utilize the Tailwind CSS framework.
 
 ## Change log
 
-Here are the changes and explanations from the original JSMastery project:
+### FundItETC v.0.0.1 (unreleased)
 
-### Solidity
+Here are the changes and explanations from the original JSMastery project's Solidity contract:
 
 - Changed the Solidity version pragma to `^0.8.9`, which allows for minor version updates to Solidity 0.8.
 - Added a `payable` modifier to the `owner` field in the `Campaign` struct to indicate that the owner can receive ether.
@@ -44,9 +46,9 @@ Here are the changes and explanations from the original JSMastery project:
 - Added annotations to the `FundIt` contract to explain the functions and variables.
 - Added import of OpenZeppelin library's `Ownable`, `ReentrancyGuard`, and `SafeMath` contracts.
 - Added function to receive and revert direct payment to the `FundIt` and `FundItProxy` contracts.
-- Changed the `createCampaign` function to cap campaign duration at 180 days.
+- Changed the `createCampaign` function to allow capping campaign duration.
 - Changed the `createCampaign` function to use `calldata` instead of `memory` for gas efficiency.
 - Changed the `donateToCampaign` function to allow donated funds to accumulate in the contract.
 - Added `withdrawFunds` function to allow the campaign owner to withdraw funds from the contract.
 - Added `CampaignCreated`, `DonationMade`, `CampaignEnded`, and `Withdrawn` events to track state changes.
-- Set the maximum number of days a campaign may run at 180 days.
+- Set the initial maximum number of days a campaign may run at 180 days.
