@@ -4,7 +4,7 @@ FundItETC is an open-source, decentralized crowd funding platform under developm
 
 It was originally inspired by a JSMastery educational project by [Adrian Hajdin](https:\\jsmastery.pro) to whom we express sincere gratitude.
 
-In the spirit of open-source project development and in keeping with the Ethereum Classic Foundational Principles, this project is openly available for review and feedback. Your input and suggestions are welcomed and encouraged. Please submit your feedback via repo the Issues tab.
+In the spirit of open-source project development and in keeping with the Ethereum Classic Foundational Principles, this project is openly available for review and feedback. Your input and suggestions are welcomed and encouraged. Please submit your feedback via the Issues tab.
 
 ## We need your help!
 
