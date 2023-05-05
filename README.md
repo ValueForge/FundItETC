@@ -44,7 +44,7 @@ Here are the changes and explanations from the original JSMastery project's Soli
 - Renamed contracts using MixedCase to `FundIt`, `IFundIt`, and `FundItProxy`.
 - Added `FundItStorage` contract to separate logic from storage.
 - Added annotations to the `FundIt` contract to explain the functions and variables.
-- Added import of OpenZeppelin library's `Ownable`, `ReentrancyGuard`, and `SafeMath` contracts.
+- Added import of OpenZeppelin's `Ownable`, `Pausable`, `ReentrancyGuard`, and `SafeMath` contracts.
 - Added function to receive and revert direct payment to the `FundIt` and `FundItProxy` contracts.
 - Changed the `createCampaign` function to allow capping campaign duration.
 - Changed the `createCampaign` function to use `calldata` instead of `memory` for gas efficiency.
@@ -52,3 +52,4 @@ Here are the changes and explanations from the original JSMastery project's Soli
 - Added `withdrawFunds` function to allow the campaign owner to withdraw funds from the contract.
 - Added `CampaignCreated`, `DonationMade`, `CampaignEnded`, and `Withdrawn` events to track state changes.
 - Set the initial maximum number of days a campaign may run at 180 days.
+- Changed all relevant imported contracts to `Upgradeable` versions using the transparent upgrade method.
