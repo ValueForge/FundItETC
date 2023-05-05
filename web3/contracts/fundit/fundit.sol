@@ -19,7 +19,7 @@ OwnableUpgradeable, ReentrancyGuardUpgradeable {
     using SafeMathUpgradeable for uint256;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor () initializer {
+    constructor() initializer {
         _disableInitializers();
     }
     

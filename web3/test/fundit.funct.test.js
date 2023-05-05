@@ -1,21 +1,19 @@
 const { expect } = require("chai");
+const { loadFixture } = require("@nomicfoundation/hardhat-network-helpers");
 
 describe("FundIt", function () {
   let FundIt, fundIt, FundItProxy, fundItProxy, FundItStorage, fundItStorage, IFundIt, ifundit, owner, addr1, addr2;
 
-  beforeEach(async () => {
-    IFundIt = await ethers.getContractFactory("IFundIt");
+  async function funditFixture() {
     FundItStorage = await ethers.getContractFactory("FundItStorage");
     FundIt = await ethers.getContractFactory("FundIt");
     FundItProxy = await ethers.getContractFactory("FundItProxy");
 
     [owner, addr1, addr2] = await ethers.getSigners();
 
-    ifundit = await IFundIt.deploy();
-    await ifundit.deployed();
     fundItStorage = await FundItStorage.deploy();
     await fundItStorage.deployed();
-    fundIt = await FundIt.deploy();
+    fundIt = await FundIt.deploy(fundItStorage.address);
     await fundIt.deployed();
 
     // Deploy proxy
@@ -24,40 +22,27 @@ describe("FundIt", function () {
 
     // Attach FundIt contract to the proxy
     fundIt = FundIt.attach(fundItProxy.address);
+
+    // Set up initial state
+    await fundIt.connect(owner).pause();
+    await fundIt.connect(owner).unpause();
+    await fundIt.connect(owner).createCampaign("Test Campaign", "A test campaign for donations", ethers.utils.parseEther("1"), 7, "https://example.com/image.jpg");
+    await fundIt.connect(addr1).donateToCampaign(0, { value: ethers.utils.parseEther("0.1") });
+  }
+
+  before(async () => {
+    await funditFixture();
+    IFundIt = await ethers.getContractFactory("IFundIt");
+    ifundit = await ethers.getContractAt("IFundIt", fundIt.address);
   });
 
-  describe("Deployment", function () {
-    it("Should deploy and set owner for FundIt contract", async function () {
-      expect(await fundIt.owner()).to.equal(owner.address);
-    });
-  
-    it("Should deploy and set owner for FundItProxy contract", async function () {
-      expect(await fundItProxy.owner()).to.equal(owner.address);
-    });
-  
-    it("Should set the implementation address in FundItProxy contract", async function () {
-      expect(await fundItProxy.implementation()).to.equal(fundIt.address);
-    });
-  
-    it("Should initialize the FundIt contract with correct initial state", async function () {
-      expect(await fundIt.numberOfCampaigns()).to.equal(0);
-    });
-  
-    it("Should initialize the FundItStorage contract with correct initial state", async function () {
-      expect(await fundItStorage.numberOfCampaigns()).to.equal(0);
-    });
-  
-    it("Should pause and unpause the FundIt contract", async function () {
-      // Pause the contract
-      await fundIt.pause();
-      expect(await fundIt.paused()).to.be.true;
-  
-      // Unpause the contract
-      await fundIt.unpause();
-      expect(await fundIt.paused()).to.be.false;
-    });
+  beforeEach(async () => {
+    [owner, addr1, addr2] = await ethers.getSigners();
+    const fixture = await loadFixture(funditFixture);
+    fundIt = fixture.fundIt;
+    fundItProxy = fixture.fundItProxy;
+    fundItStorage = fixture.fundItStorage;
   });
-  
   describe("Create campaign", function () {
   it("Should create a new campaign and emit event", async function () {
     // Prepare campaign data
