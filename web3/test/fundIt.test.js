@@ -19,8 +19,8 @@ beforeEach(async () => {
   fundItStorage = await FundItStorage.deploy();
   await fundItStorage.deployed();
 
-  // Deploy FundIt contract with the FundItStorage contract address as a constructor argument
-  fundIt = await FundIt.deploy(fundItStorage.address);
+  // Deploy FundIt contract
+  fundIt = await FundIt.deploy();
   await fundIt.deployed();
 
   // Deploy FundItProxy contract with the FundIt contract address, owner address, and an empty data array as constructor arguments
@@ -30,7 +30,9 @@ beforeEach(async () => {
   // Attach the FundIt contract instance to the FundItProxy contract address
   fundIt = FundIt.attach(fundItProxy.address);
 
-  // Set up the initial state for the test
+  // Initialize the FundIt contract with the FundItStorage address
+  await fundIt.connect(owner).initialize(fundItStorage.address);
+
   // Unpause the contract to allow the creation of a campaign
   await fundIt.connect(owner).unpause();
 

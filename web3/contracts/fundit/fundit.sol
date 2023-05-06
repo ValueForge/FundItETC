@@ -48,10 +48,11 @@ OwnableUpgradeable, ReentrancyGuardUpgradeable {
         }
 
     // Function to initialize contract state
-    function initialize() initializer internal {
+    function initialize(address fundItStorageAddress) external initializer {
         __Pausable_init();
         __Ownable_init();
         __ReentrancyGuard_init();
+        _setFundItStorage(fundItStorageAddress);
     }
 
     // Function to set FundItStorage contract address
