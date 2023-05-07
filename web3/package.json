@@ -15,12 +15,12 @@
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.6",
     "@nomicfoundation/hardhat-network-helpers": "^1.0.8",
-    "@nomicfoundation/hardhat-toolbox": "^2.0.2",
+    "@nomicfoundation/hardhat-toolbox": "^1.0.2",
     "@nomiclabs/hardhat-web3": "^2.0.0",
     "@openzeppelin/hardhat-upgrades": "^1.23.1",
     "hardhat": "^2.14.0",
     "mocha": "^10.2.0",
-    "web3": "^1.9.0"
+    "web3": "^0.20.7"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.8.3",

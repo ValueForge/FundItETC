@@ -3,49 +3,41 @@ const { ethers } = require("hardhat");
 const { BigNumber } = ethers;
 
 describe("FundIt", function () {
-  let FundIt, fundIt, FundItProxy, fundItProxy, owner, addr1, addr2, addrs;
-
-  const TITLE = "Test Campaign";
-  const DESCRIPTION = "A test campaign for donations";
-  const TARGET = ethers.utils.parseEther("1");
-  const DURATION = 7;
-  const IMAGE = "https://example.com/image.jpg";
-  const OVERRIDE = { gasLimit: 10000000 };
+  let FundItFactory, fundIt, FundItStorageFactory, fundItStorage, FundItProxyFactory, fundItProxy;
 
   beforeEach(async function () {
-    // Deploy FundIt contract
-    FundIt = await ethers.getContractFactory("FundIt");
-    fundIt = await FundIt.deploy();
+    FundItFactory = await ethers.getContractFactory("FundIt");
+    FundItStorageFactory = await ethers.getContractFactory("FundItStorage");
+    FundItProxyFactory = await ethers.getContractFactory("FundItProxy");
+
+    fundItStorage = await FundItStorageFactory.deploy();
+    await fundItStorage.deployed();
+
+    fundIt = await FundItFactory.deploy();
     await fundIt.deployed();
 
-    // Deploy FundItProxy contract
-    FundItProxy = await ethers.getContractFactory("FundItProxy");
-    fundItProxy = await FundItProxy.deploy(fundIt.address, owner.address, [], OVERRIDE);
+    const initPayload = fundIt.interface.encodeFunctionData("initialize", [fundItStorage.address]);
+    fundItProxy = await FundItProxyFactory.deploy(fundIt.address, fundItStorage.address, initPayload);
     await fundItProxy.deployed();
 
-    // Get signers
-    [owner, addr1, addr2, ...addrs] = await ethers.getSigners();
-
-    // Initialize the FundIt contract through the proxy
-    const initializeData = fundIt.interface.encodeFunctionData("initialize", [fundIt.address]);
-    await fundItProxy.connect(owner).upgradeToAndCall(fundIt.address, initializeData, OVERRIDE);
-
-    // Attach the proxy contract to the FundIt instance
-    fundIt = await ethers.getContractAt("FundIt", fundItProxy.address);
+    // Create a new instance of the FundIt contract using the proxy's address
+    fundIt = FundItFactory.attach(fundItProxy.address);
   });
 
   describe("Create Campaign", function () {
     it("Should create a new campaign", async function () {
-      await fundIt.connect(owner).createCampaign(TITLE, DESCRIPTION, TARGET, DURATION, IMAGE, OVERRIDE);
+      const tx = await fundIt.createCampaign("Test Campaign", "This is a test campaign", ethers.utils.parseEther("1"), 30, "test_image");
+      await tx.wait();
 
       const campaign = await fundIt.campaigns(0);
-      expect(campaign.owner).to.equal(owner.address);
-      expect(campaign.title).to.equal(TITLE);
-      expect(campaign.description).to.equal(DESCRIPTION);
-      expect(campaign.target).to.equal(TARGET);
-      expect(campaign.deadline).to.be.closeTo(BigNumber.from(Date.now()).add(DURATION * 24 * 60 * 60), 120);
-      expect(campaign.image).to.equal(IMAGE);
-      expect(campaign.active).to.be.true;
+
+      expect(campaign.owner).to.equal(await ethers.provider.getSigner(0).getAddress());
+      expect(campaign.title).to.equal("Test Campaign");
+      expect(campaign.description).to.equal("This is a test campaign");
+      expect(campaign.target).to.equal(ethers.utils.parseEther("1"));
+      expect(campaign.deadline).to.equal((await ethers.provider.getBlock("latest")).timestamp + 30 * 24 * 60 * 60);
+      expect(campaign.image).to.equal("test_image");
+      expect(campaign.active).to.equal(true);
     });
   });
 

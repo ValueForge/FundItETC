@@ -18,16 +18,11 @@ contract FundIt is IFundIt, FundItStorage, Initializable, PausableUpgradeable,
 OwnableUpgradeable, ReentrancyGuardUpgradeable {
     using SafeMathUpgradeable for uint256;
 
-    /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor() initializer {
-        _disableInitializers();
-    }
-    
     // Variable declaration to cap campaign duration at 180 days
     uint256 maxDuration = 15552000;
 
     // Variable declaration to store the FundItStorage contract address
-    address public fundItStorageAddress;
+    FundItStorage private _storage;
 
     // Event emitted when a new campaign is created
     event CampaignCreated(uint256 indexed campaignId, address indexed owner);
@@ -48,12 +43,12 @@ OwnableUpgradeable, ReentrancyGuardUpgradeable {
         }
 
     // Function to initialize contract state
-    function initialize(address _fundItStorageAddress) external initializer {
+    function initialize(address _storageAddress) external initializer {
         __Pausable_init();
         __Ownable_init();
         __ReentrancyGuard_init();
         
-        fundItStorageAddress = _fundItStorageAddress;
+        _storage = FundItStorage(_storageAddress);
     }
 
     // Function to create a new campaign
