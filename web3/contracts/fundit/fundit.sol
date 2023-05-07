@@ -65,7 +65,8 @@ OwnableUpgradeable, ReentrancyGuardUpgradeable {
             require(bytes(_description).length > 0, "Description is required");
             require(_target > 0, "Target amount must be greater than 0");
             require(_duration > 0, "Campaign duration must be greater than 0");
-            require(_duration <= maxDuration, "Campaign duration exceeds maximum limit");
+            require(_duration.mul(24 * 60 * 60) <= maxDuration, "Campaign duration exceeds maximum limit");
+
 
             // Create a new campaign and store it in the campaigns mapping
             Campaign storage campaign = campaigns[numberOfCampaigns];
