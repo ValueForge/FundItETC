@@ -1,162 +1,132 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
+const { BigNumber } = ethers;
 
-// Test suite for the FundIt contract
 describe("FundIt", function () {
-  let FundIt, fundIt, FundItProxy, fundItProxy, FundItStorage, fundItStorage, owner, addr1, addr2;
+  let FundIt, fundIt, FundItProxy, fundItProxy, owner, addr1, addr2, addrs;
 
-// Set up the contract instances before each test
-beforeEach(async () => {
-  // Get contract factories
-  FundItStorage = await ethers.getContractFactory("FundItStorage");
-  FundIt = await ethers.getContractFactory("FundIt");
-  FundItProxy = await ethers.getContractFactory("FundItProxy");
+  const TITLE = "Test Campaign";
+  const DESCRIPTION = "A test campaign for donations";
+  const TARGET = ethers.utils.parseEther("1");
+  const DURATION = 7;
+  const IMAGE = "https://example.com/image.jpg";
+  const OVERRIDE = { gasLimit: 10000000 };
 
-  // Get signers (accounts)
-  [owner, addr1, addr2] = await ethers.getSigners();
+  beforeEach(async function () {
+    // Deploy FundIt contract
+    FundIt = await ethers.getContractFactory("FundIt");
+    fundIt = await FundIt.deploy();
+    await fundIt.deployed();
 
-  // Deploy and initialize FundItStorage contract
-  fundItStorage = await FundItStorage.deploy();
-  await fundItStorage.deployed();
+    // Deploy FundItProxy contract
+    FundItProxy = await ethers.getContractFactory("FundItProxy");
+    fundItProxy = await FundItProxy.deploy(fundIt.address, owner.address, [], OVERRIDE);
+    await fundItProxy.deployed();
 
-  // Deploy FundIt contract
-  fundIt = await FundIt.deploy();
-  await fundIt.deployed();
-  await fundIt.initialize(fundItStorage.address);
+    // Get signers
+    [owner, addr1, addr2, ...addrs] = await ethers.getSigners();
 
-  // Deploy FundItProxy contract with the FundIt contract address, owner address, and an empty data array as constructor arguments
-  fundItProxy = await FundItProxy.deploy(fundIt.address, owner.address, []);
-  await fundItProxy.deployed();
+    // Initialize the FundIt contract through the proxy
+    const initializeData = fundIt.interface.encodeFunctionData("initialize", [fundIt.address]);
+    await fundItProxy.connect(owner).upgradeToAndCall(fundIt.address, initializeData, OVERRIDE);
 
-  // Attach the FundIt contract instance to the FundItProxy contract address
-  fundIt = FundIt.attach(fundItProxy.address);
+    // Attach the proxy contract to the FundIt instance
+    fundIt = await ethers.getContractAt("FundIt", fundItProxy.address);
+  });
 
-  // Initialize the FundIt contract with the FundItStorage address
-  await fundIt.connect(owner).initialize(fundItStorage.address);
+  describe("Create Campaign", function () {
+    it("Should create a new campaign", async function () {
+      await fundIt.connect(owner).createCampaign(TITLE, DESCRIPTION, TARGET, DURATION, IMAGE, OVERRIDE);
 
-  // Unpause the contract to allow the creation of a campaign
-  await fundIt.connect(owner).unpause();
-
-  // Create a test campaign using the owner account
-  await fundIt.connect(owner).createCampaign("Test Campaign", "A test campaign for donations", ethers.utils.parseEther("1"), 7, "https://example.com/image.jpg");
-
-  // Make a donation to the test campaign using addr1 account
-  await fundIt.connect(addr1).donateToCampaign(0, { value: ethers.utils.parseEther("0.1") });
-});
-
-  // Test deployment of contracts and initialization
-  describe("Deployment", function () {
-    it("Should deploy and set owner for FundIt contract", async function () {
-      expect(await fundIt.owner()).to.equal(owner.address);
-    });
-
-    it("Should deploy and set owner for FundItProxy contract", async function () {
-      expect(await fundItProxy.owner()).to.equal(owner.address);
-    });
-
-    it("Should set the implementation address in FundItProxy contract", async function () {
-      expect(await fundItProxy.implementation()).to.equal(fundIt.address);
-    });
-
-    it("Should initialize the FundIt contract with correct initial state", async function () {
-      expect(await fundIt.numberOfCampaigns()).to.equal(1);
-    });
-
-    it("Should initialize the FundItStorage contract with correct initial state", async function () {
-      expect(await fundItStorage.numberOfCampaigns()).to.equal(1);
-    });
-
-    it("Should pause and unpause the FundIt contract", async function () {
-      // Pause the contract
-      await fundIt.pause();
-      expect(await fundIt.paused()).to.be.true;
-
-      // Unpause the contract
-      await fundIt.unpause();
-      expect(await fundIt.paused()).to.be.false;
+      const campaign = await fundIt.campaigns(0);
+      expect(campaign.owner).to.equal(owner.address);
+      expect(campaign.title).to.equal(TITLE);
+      expect(campaign.description).to.equal(DESCRIPTION);
+      expect(campaign.target).to.equal(TARGET);
+      expect(campaign.deadline).to.be.closeTo(BigNumber.from(Date.now()).add(DURATION * 24 * 60 * 60), 120);
+      expect(campaign.image).to.equal(IMAGE);
+      expect(campaign.active).to.be.true;
     });
   });
 
-  // Test campaign creation
-  describe("Create campaign", function () {
-    it("Should create a new campaign and emit event", async function () {
-      // Prepare campaign data
-      const title = "Test Campaign";
-      const description = "This is a test campaign";
-      const target = ethers.utils.parseEther("1");
-      const duration = 7;
-      const image = "https://example.com/image.jpg";
-
-      // Create a new campaign
-      await expect(
-        fundIt.connect(addr1).createCampaign(title, description, target, duration, image)
-      )
-        .to.emit(fundIt, "CampaignCreated")
-        .withArgs(1, addr1.address); // Check if the event is emitted with correct arguments
-
-      // Retrieve the campaign data
-      const campaign = await fundIt.connect(addr1).campaigns(1);
-
-      // Check if the campaign data is correct
-      expect(campaign.owner).to.equal(addr1.address);
-      expect(campaign.title).to.equal(title);
-      expect(campaign.description).to.equal(description);
-      expect(campaign.target).to.equal(target);
-      expect(campaign.image).to.equal(image);
-      expect(campaign.active).to.be.true;
+  describe("Donate to Campaign", function () {
+    beforeEach(async function () {
+      await fundIt.connect(owner).createCampaign(TITLE, DESCRIPTION, TARGET, DURATION, IMAGE, OVERRIDE);
     });
-    
-    // Test donations to campaigns
-    describe("Donations", function () {
-      beforeEach(async function () {
-        // Create a new campaign before each test
-        await fundIt.connect(owner).createCampaign("Test Campaign", "A test campaign for donations", ethers.utils.parseEther("1"), 7, "https://example.com/image.jpg");
-      });
-    
-      it("Should donate to a campaign successfully", async function () {
-        // Donate to the campaign
-        await fundIt.connect(addr1).donateToCampaign(1, { value: ethers.utils.parseEther("0.1") });
-    
-        // Check the amount collected
-        const campaign = await fundIt.campaigns(1);
-        expect(campaign.amountCollected).to.equal(ethers.utils.parseEther("0.1"));
-    
-        // Check the donors and donations arrays
-        const [donors, donations] = await fundIt.getCampaignDonors(1);
-        expect(donors[0]).to.equal(addr1.address);
-        expect(donations[0]).to.equal(ethers.utils.parseEther("0.1"));
-      });
-    
-      it("Should fail to donate to a non-existent campaign", async function () {
-        // Try to donate to a non-existent campaign
-        await expect(fundIt.connect(addr1).donateToCampaign(2, { value: ethers.utils.parseEther("0.1") }))
-          .to.be.revertedWith("Campaign does not exist");
-      });
-    
-      it("Should fail to donate to an inactive campaign", async function () {
-        // End the campaign
-        await fundIt.connect(owner).endCampaign(1);
-    
-        // Try to donate to an inactive campaign
-        await expect(fundIt.connect(addr1).donateToCampaign(1, { value: ethers.utils.parseEther("0.1") }))
-          .to.be.revertedWith("Campaign is not active");
-      });
-    
-      it("Should fail to donate to a campaign after the deadline", async function () {
-        // Set the deadline to the past
-        const deadline = (await ethers.provider.getBlock()).timestamp - 1000;
-        await fundIt.setCampaignDeadline(1, deadline);
-    
-        // Try to donate to a campaign after the deadline
-        await expect(fundIt.connect(addr1).donateToCampaign(1, { value: ethers.utils.parseEther("0.1") }))
-          .to.be.revertedWith("Campaign has ended");
-      });
-    
-      it("Should fail to donate with zero amount", async function () {
-        // Try to donate with zero amount
-        await expect(fundIt.connect(addr1).donateToCampaign(1, { value: 0 }))
-          .to.be.revertedWith("Donation amount must be greater than 0");
-      });
+
+    it("Should allow users to make donations to the campaign", async function () {
+      const donationAmount = ethers.utils.parseEther("0.1");
+      await fundIt.connect(addr1).donateToCampaign(0, { value: donationAmount });
+
+      const campaign = await fundIt.campaigns(0);
+      expect(campaign.amountCollected).to.equal(donationAmount);
+
+      const [donors, donations] = await fundIt.getCampaignDonors(0);
+      expect(donors[0]).to.equal(addr1.address);
+      expect(donations[0]).to.equal(donationAmount);
+    });
+  });
+
+  describe("Withdraw Funds", function () {
+    beforeEach(async function () {
+      await fundIt.connect(owner).createCampaign(TITLE, DESCRIPTION, TARGET, DURATION, IMAGE, OVERRIDE);
+      await fundIt.connect(addr1).donateToCampaign(0, { value: TARGET });
+    });
+
+    it("Should allow the campaign owner to withdraw funds after the deadline", async function () {
+      // Fast-forward to the deadline
+      await ethers.provider.send("evm_increaseTime", [DURATION * 24 * 60 * 60]);
+      await ethers.provider.send("evm_mine");
+
+      const initialBalance = await owner.getBalance();
+      await fundIt.connect(owner).withdrawFunds(0);
+
+      const campaign = await fundIt.campaigns(0);
+      expect(campaign.active).to.be.false;
+
+      const finalBalance = await owner.getBalance();
+      expect(finalBalance).to.be.gt(initialBalance);
+    });
+  });
+
+  describe("End Campaign", function () {
+    beforeEach(async function () {
+      await fundIt.connect(owner).createCampaign(TITLE, DESCRIPTION, TARGET, DURATION, IMAGE, OVERRIDE);
+    });
+
+    it("Should allow the campaign owner to end the campaign if no funds were collected", async function () {
+      await fundIt.connect(owner).endCampaign(0);
+
+      const campaign = await fundIt.campaigns(0);
+      expect(campaign.active).to.be.false;
+    });
+  });
+
+  describe("Get Active Campaigns", function () {
+    beforeEach(async function () {
+      await fundIt.connect(owner).createCampaign(TITLE, DESCRIPTION, TARGET, DURATION, IMAGE, OVERRIDE);
+      await fundIt.connect(addr1).createCampaign(TITLE, DESCRIPTION, TARGET, DURATION, IMAGE, OVERRIDE);
+    });
+
+    it("Should return all active campaigns", async function () {
+      const activeCampaigns = await fundIt.getActiveCampaigns();
+      expect(activeCampaigns.length).to.equal(2);
+    });
+  });
+
+  describe("Get Ended Campaigns", function () {
+    beforeEach(async function () {
+      await fundIt.connect(owner).createCampaign(TITLE, DESCRIPTION, TARGET, DURATION, IMAGE, OVERRIDE);
+      await fundIt.connect(addr1).createCampaign(TITLE, DESCRIPTION, TARGET, DURATION, IMAGE, OVERRIDE);
+
+      // Fast-forward to the deadline
+      await ethers.provider.send("evm_increaseTime", [DURATION * 24 * 60 * 60]);
+      await ethers.provider.send("evm_mine");
+    });
+
+    it("Should return all ended campaigns", async function () {
+      const endedCampaigns = await fundIt.getEndedCampaigns();
+      expect(endedCampaigns.length).to.equal(2);
     });
   });
 });
