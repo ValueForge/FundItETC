@@ -22,6 +22,7 @@ beforeEach(async () => {
   // Deploy FundIt contract
   fundIt = await FundIt.deploy();
   await fundIt.deployed();
+  await fundIt.initialize(fundItStorage.address);
 
   // Deploy FundItProxy contract with the FundIt contract address, owner address, and an empty data array as constructor arguments
   fundItProxy = await FundItProxy.deploy(fundIt.address, owner.address, []);

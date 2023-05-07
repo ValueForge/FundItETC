@@ -26,6 +26,9 @@ OwnableUpgradeable, ReentrancyGuardUpgradeable {
     // Variable declaration to cap campaign duration at 180 days
     uint256 maxDuration = 15552000;
 
+    // Variable declaration to store the FundItStorage contract address
+    address public fundItStorageAddress;
+
     // Event emitted when a new campaign is created
     event CampaignCreated(uint256 indexed campaignId, address indexed owner);
 
@@ -50,11 +53,7 @@ OwnableUpgradeable, ReentrancyGuardUpgradeable {
         __Ownable_init();
         __ReentrancyGuard_init();
         
-        _initializeFundItStorage(_fundItStorageAddress);
-    }
-
-    function _initializeFundItStorage(address _fundItStorageAddress) internal {
-        require(_fundItStorageAddress != address(0), "FundIt: fundItStorageAddress cannot be zero address");
+        fundItStorageAddress = _fundItStorageAddress;
     }
 
     // Function to create a new campaign
