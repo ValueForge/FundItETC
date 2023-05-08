@@ -15,17 +15,20 @@ let owner, addr1, addr2;
 const TITLE = "Test Campaign";
 const DESCRIPTION = "This is a test campaign";
 const TARGET = ethers.utils.parseEther("1");
-const DURATION = 30 * 24 * 60 * 60; // 30 days
+const DURATION = 30 * 86400; // 30 days in seconds
 const IMAGE = "test_image";
 const OVERRIDE = { gasLimit: 2000000 };
 
 // Define the main test suite
-describe("FundItDeployer", function () {
+describe("FundIt", function () {
   // Deploy and set up contracts before each test
   beforeEach(async function () {
     // Get the signers
     [owner, addr1, addr2] = await ethers.getSigners();
   
+    // Initialize FundItFactory
+    FundItFactory = await ethers.getContractFactory("FundIt");
+
     // Deploy FundItDeployer contract
     FundItDeployerFactory = await ethers.getContractFactory("FundItDeployer");
     fundItDeployer = await FundItDeployerFactory.deploy();
@@ -34,11 +37,6 @@ describe("FundItDeployer", function () {
     // Get the deployed FundIt contract through the FundItDeployer contract
     const fundItAddress = await fundItDeployer.proxy();
     fundIt = await ethers.getContractAt("FundIt", fundItAddress);
-  
-    // Deploy FundIt contract
-    FundItFactory = await ethers.getContractFactory("FundIt");
-    fundIt = await FundItFactory.deploy();
-    await fundIt.deployed();
   
     // Deploy FundItStorage contract
     FundItStorageFactory = await ethers.getContractFactory("FundItStorage");
@@ -70,8 +68,18 @@ describe("FundItDeployer", function () {
 
   // Test proper error handling
   describe("Error Handling", function () {
-    beforeEach(async function () {
-      await fundIt.connect(owner).createCampaign(TITLE, DESCRIPTION, TARGET, DURATION, IMAGE, OVERRIDE);
+    afterEach(async function () {
+      // Reset the blockchain time
+      await ethers.provider.send("evm_setNextBlockTimestamp", [Math.floor(Date.now() / 1000)]);
+    });
+    
+    it("Should revert when creating a campaign with a duration of 0", async function () {
+      await expect(fundIt.connect(owner).createCampaign(TITLE, DESCRIPTION, TARGET, 0, IMAGE)).to.be.revertedWith("Campaign duration must be greater than 0");
+    });
+
+    it("Should revert when creating a campaign with a duration exceeding the maximum limit (180 days)", async function () {
+      const maxDuration = 180 * 86400;
+      await expect(fundIt.connect(owner).createCampaign(TITLE, DESCRIPTION, TARGET, maxDuration + 1, IMAGE)).to.be.revertedWith("Campaign duration exceeds maximum limit");
     });
 
     it("Should revert when donating to a non-existent campaign", async function () {
@@ -128,6 +136,11 @@ describe("FundItDeployer", function () {
       await fundIt.connect(owner).createCampaign(TITLE, DESCRIPTION, TARGET, DURATION, IMAGE, OVERRIDE);
     });
 
+    afterEach(async function () {
+      // Reset the blockchain time
+      await ethers.provider.send("evm_setNextBlockTimestamp", [Math.floor(Date.now() / 1000)]);
+    });
+    
     it("Should allow users to make donations to the campaign", async function () {
       const donationAmount = ethers.utils.parseEther("0.1");
       await fundIt.connect(addr1).donateToCampaign(0, { value: donationAmount });
@@ -147,6 +160,12 @@ describe("FundItDeployer", function () {
       await fundIt.connect(owner).createCampaign(TITLE, DESCRIPTION, TARGET, DURATION, IMAGE, OVERRIDE);
       await fundIt.connect(addr1).donateToCampaign(0, { value: TARGET });
     });
+
+    afterEach(async function () {
+      // Reset the blockchain time
+      await ethers.provider.send("evm_setNextBlockTimestamp", [Math.floor(Date.now() / 1000)]);
+    });
+    
 
     it("Should allow the campaign owner to withdraw funds after the deadline", async function () {
       // Fast-forward to the deadline
@@ -170,6 +189,11 @@ describe("FundItDeployer", function () {
       await fundIt.connect(owner).createCampaign(TITLE, DESCRIPTION, TARGET, DURATION, IMAGE, OVERRIDE);
     });
         
+    afterEach(async function () {
+      // Reset the blockchain time
+      await ethers.provider.send("evm_setNextBlockTimestamp", [Math.floor(Date.now() / 1000)]);
+    });
+    
     it("Should allow the campaign owner to end the campaign if no funds were collected", async function () {
       await fundIt.connect(owner).endCampaign(0);
       const campaign = await fundIt.campaigns(0);
@@ -200,6 +224,11 @@ describe("FundItDeployer", function () {
       await ethers.provider.send("evm_mine");
     });
 
+    afterEach(async function () {
+      // Reset the blockchain time
+      await ethers.provider.send("evm_setNextBlockTimestamp", [Math.floor(Date.now() / 1000)]);
+    });
+    
     it("Should return all ended campaigns", async function () {
       const endedCampaigns = await fundIt.getEndedCampaigns();
       expect(endedCampaigns.length).to.equal(2);
