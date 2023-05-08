@@ -1,10 +1,10 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 const { BigNumber } = ethers;
-const { ProxyAdmin } = require('@openzeppelin/contracts/proxy/transparent/ProxyAdmin');
+const ProxyAdmin = artifacts.require("@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol");
 
-describe("FundIt", function () {
-  let FundItFactory, fundIt, FundItStorageFactory, fundItStorage, FundItProxyFactory, fundItProxy;
+describe("FundItDeployer", function () {
+  let FundItDeployerFactory, fundItDeployer, fundIt;
   let owner, addr1, addr2;
   const TITLE = "Test Campaign";
   const DESCRIPTION = "This is a test campaign";
@@ -17,6 +17,14 @@ describe("FundIt", function () {
   beforeEach(async function () {
     [owner, addr1, addr2] = await ethers.getSigners();
 
+    FundItDeployerFactory = await ethers.getContractFactory("FundItDeployer");
+    fundItDeployer = await FundItDeployerFactory.deploy();
+    await fundItDeployer.deployed();
+
+    // Get the deployed FundIt contract through the FundItDeployer contract
+    const fundItAddress = await fundItDeployer.proxy();
+    fundIt = await ethers.getContractAt("FundIt", fundItAddress);
+  
     FundItFactory = await ethers.getContractFactory("FundIt");
     FundItStorageFactory = await ethers.getContractFactory("FundItStorage");
     FundItProxyFactory = await ethers.getContractFactory("FundItProxy");
