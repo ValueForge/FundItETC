@@ -1,7 +1,6 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 const { BigNumber } = ethers;
-const ProxyAdmin = artifacts.require("@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol");
 
 describe("FundItDeployer", function () {
   let FundItDeployerFactory, fundItDeployer, fundIt;
@@ -17,6 +16,9 @@ describe("FundItDeployer", function () {
   beforeEach(async function () {
     [owner, addr1, addr2] = await ethers.getSigners();
 
+    const ProxyAdmin = await ethers.getContractFactory("@openzeppelin/contracts/proxy/transparent/ProxyAdmin");
+    const TransparentUpgradeableProxy = await ethers.getContractFactory("@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy");
+    
     FundItDeployerFactory = await ethers.getContractFactory("FundItDeployer");
     fundItDeployer = await FundItDeployerFactory.deploy();
     await fundItDeployer.deployed();
