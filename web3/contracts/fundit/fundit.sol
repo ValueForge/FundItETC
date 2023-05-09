@@ -5,26 +5,22 @@ import "./IFundIt.sol";
 import "./FundItStorage.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 
 /// @custom:security-contact app.valueforge@gmail.com
 
 // The FundIt contract inherits from IFundIt, FundItStorage, PausableUpgradeable,
-// OwnableUpgradeable, Initializable, ReentrancyGuardUpgradeable contracts
+// Initializable, ReentrancyGuardUpgradeable contracts
 // and uses SafeMathUpgradeable library
-contract FundIt is IFundIt, FundItStorage, Initializable, PausableUpgradeable,
-OwnableUpgradeable, ReentrancyGuardUpgradeable {
+contract FundIt is IFundIt, FundItStorage, Initializable, PausableUpgradeable, ReentrancyGuardUpgradeable {
     using SafeMathUpgradeable for uint256;
 
-    /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor () initializer {
-        _disableInitializers();
-    }
-    
     // Variable declaration to cap campaign duration at 180 days
     uint256 maxDuration = 15552000;
+
+    // Variable declaration to store the FundItStorage contract address
+    FundItStorage private _storage;
 
     // Event emitted when a new campaign is created
     event CampaignCreated(uint256 indexed campaignId, address indexed owner);
@@ -45,12 +41,13 @@ OwnableUpgradeable, ReentrancyGuardUpgradeable {
         }
 
     // Function to initialize contract state
-    function initialize() initializer internal {
+    function initialize(address _storageAddress) external initializer {
         __Pausable_init();
-        __Ownable_init();
         __ReentrancyGuard_init();
+        
+        _storage = FundItStorage(_storageAddress);
     }
-    
+
     // Function to create a new campaign
     function createCampaign(
         string calldata _title,
@@ -65,7 +62,8 @@ OwnableUpgradeable, ReentrancyGuardUpgradeable {
             require(bytes(_description).length > 0, "Description is required");
             require(_target > 0, "Target amount must be greater than 0");
             require(_duration > 0, "Campaign duration must be greater than 0");
-            require(_duration <= maxDuration, "Campaign duration exceeds maximum limit");
+            require(_duration.mul(24 * 60 * 60) <= maxDuration, "Campaign duration exceeds maximum limit");
+
 
             // Create a new campaign and store it in the campaigns mapping
             Campaign storage campaign = campaigns[numberOfCampaigns];
@@ -223,12 +221,12 @@ OwnableUpgradeable, ReentrancyGuardUpgradeable {
     }
 
     // Function to pause the contract
-    function pause() external onlyOwner {
+    function pause() external {
         _pause();
     }
 
     // Function to unpause the contract
-    function unpause() external onlyOwner {
+    function unpause() external {
         _unpause();
     }
 }

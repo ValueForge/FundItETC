@@ -9,3 +9,7 @@ typechain-types
 cache
 artifacts
 
+#Solidity Debugger files
+artifacts-dbg
+dbg.project.json
+contracts-dbg

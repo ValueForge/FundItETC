@@ -1,11 +1,12 @@
 /** @type import('hardhat/config').HardhatUserConfig */
-require("@nomiclabs/hardhat-waffle");
 require('@openzeppelin/hardhat-upgrades');
+require("@nomicfoundation/hardhat-chai-matchers");
+require("@nomiclabs/hardhat-web3");
 
 module.exports = {
   solidity: {
     version: '0.8.9',
-    defaultNetwork: 'mordor',
+    defaultNetwork: 'hardhat',
     networks: {
       hardhat: {},
       mordor: {
