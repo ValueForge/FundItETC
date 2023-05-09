@@ -5,17 +5,15 @@ import "./IFundIt.sol";
 import "./FundItStorage.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 
 /// @custom:security-contact app.valueforge@gmail.com
 
 // The FundIt contract inherits from IFundIt, FundItStorage, PausableUpgradeable,
-// OwnableUpgradeable, Initializable, ReentrancyGuardUpgradeable contracts
+// Initializable, ReentrancyGuardUpgradeable contracts
 // and uses SafeMathUpgradeable library
-contract FundIt is IFundIt, FundItStorage, Initializable, PausableUpgradeable,
-OwnableUpgradeable, ReentrancyGuardUpgradeable {
+contract FundIt is IFundIt, FundItStorage, Initializable, PausableUpgradeable, ReentrancyGuardUpgradeable {
     using SafeMathUpgradeable for uint256;
 
     // Variable declaration to cap campaign duration at 180 days
@@ -45,7 +43,6 @@ OwnableUpgradeable, ReentrancyGuardUpgradeable {
     // Function to initialize contract state
     function initialize(address _storageAddress) external initializer {
         __Pausable_init();
-        __Ownable_init();
         __ReentrancyGuard_init();
         
         _storage = FundItStorage(_storageAddress);
