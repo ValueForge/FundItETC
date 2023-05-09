@@ -22,38 +22,6 @@ const OVERRIDE = { gasLimit: 2000000 };
 
 // Define the main test suite
 describe("FundItTest", function () {
-  // Deploy and set up contracts before each test
-  // beforeEach(async function () {
-    // Get the signers
-    // [owner, addr1, addr2] = await ethers.getSigners();
-  
-    // Initialize FundItFactory
-    // FundItFactory = await ethers.getContractFactory("FundIt");
-
-    // Deploy FundItDeployer contract
-    // FundItDeployerFactory = await ethers.getContractFactory("FundItDeployer");
-    // fundItDeployer = await FundItDeployerFactory.deploy();
-    // await fundItDeployer.deployed();
-  
-    // Get the deployed FundIt contract through the FundItDeployer contract
-    // const fundItAddress = await fundItDeployer.proxy();
-    // fundIt = await ethers.getContractAt("FundIt", fundItAddress);
-  
-    // Deploy FundItStorage contract
-    // FundItStorageFactory = await ethers.getContractFactory("FundItStorage");
-    // fundItStorage = await FundItStorageFactory.deploy();
-    // await fundItStorage.deployed();
-  
-    // Deploy FundItProxy contract
-    // FundItProxyFactory = await ethers.getContractFactory("FundItProxy");
-    // const initPayload = fundIt.interface.encodeFunctionData("initialize", [fundItStorage.address]);
-    // fundItProxy = await FundItProxyFactory.deploy(fundIt.address, fundItStorage.address, initPayload);
-    // await fundItProxy.deployed();
-  
-    // Create a new instance of the FundIt contract using the proxy's address
-    // fundIt = FundItFactory.attach(fundItProxy.address);
-  // });
-  
   beforeEach(async function () {
     const deployedContracts = await deployContracts();
     fundItStorage = deployedContracts.fundItStorage;
