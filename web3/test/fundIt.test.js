@@ -5,6 +5,7 @@ const { BigNumber } = ethers;
 const { BN, expectEvent, expectRevert, time } = require('@openzeppelin/test-helpers');
 const ProxyAdmin = require('@openzeppelin/contracts/build/contracts/ProxyAdmin.json');
 const ProxyAdminABI = require("@openzeppelin/contracts/build/contracts/ProxyAdmin.json").abi;
+const { deployContracts } = require('../scripts/deploy'); 
 
 // Define contract variables
 let FundItDeployerFactory, FundItFactory, FundItStorageFactory, FundItProxyFactory, IFundItFactory;
@@ -15,44 +16,53 @@ let owner, addr1, addr2;
 const TITLE = "Test Campaign";
 const DESCRIPTION = "This is a test campaign";
 const TARGET = ethers.utils.parseEther("1");
-const DURATION = 30 * 86400; // 30 days in seconds
+const DURATION = 30
 const IMAGE = "test_image";
 const OVERRIDE = { gasLimit: 2000000 };
 
 // Define the main test suite
-describe("FundIt", function () {
+describe("FundItTest", function () {
   // Deploy and set up contracts before each test
-  beforeEach(async function () {
+  // beforeEach(async function () {
     // Get the signers
-    [owner, addr1, addr2] = await ethers.getSigners();
+    // [owner, addr1, addr2] = await ethers.getSigners();
   
     // Initialize FundItFactory
-    FundItFactory = await ethers.getContractFactory("FundIt");
+    // FundItFactory = await ethers.getContractFactory("FundIt");
 
     // Deploy FundItDeployer contract
-    FundItDeployerFactory = await ethers.getContractFactory("FundItDeployer");
-    fundItDeployer = await FundItDeployerFactory.deploy();
-    await fundItDeployer.deployed();
+    // FundItDeployerFactory = await ethers.getContractFactory("FundItDeployer");
+    // fundItDeployer = await FundItDeployerFactory.deploy();
+    // await fundItDeployer.deployed();
   
     // Get the deployed FundIt contract through the FundItDeployer contract
-    const fundItAddress = await fundItDeployer.proxy();
-    fundIt = await ethers.getContractAt("FundIt", fundItAddress);
+    // const fundItAddress = await fundItDeployer.proxy();
+    // fundIt = await ethers.getContractAt("FundIt", fundItAddress);
   
     // Deploy FundItStorage contract
-    FundItStorageFactory = await ethers.getContractFactory("FundItStorage");
-    fundItStorage = await FundItStorageFactory.deploy();
-    await fundItStorage.deployed();
+    // FundItStorageFactory = await ethers.getContractFactory("FundItStorage");
+    // fundItStorage = await FundItStorageFactory.deploy();
+    // await fundItStorage.deployed();
   
     // Deploy FundItProxy contract
-    FundItProxyFactory = await ethers.getContractFactory("FundItProxy");
-    const initPayload = fundIt.interface.encodeFunctionData("initialize", [fundItStorage.address]);
-    fundItProxy = await FundItProxyFactory.deploy(fundIt.address, fundItStorage.address, initPayload);
-    await fundItProxy.deployed();
+    // FundItProxyFactory = await ethers.getContractFactory("FundItProxy");
+    // const initPayload = fundIt.interface.encodeFunctionData("initialize", [fundItStorage.address]);
+    // fundItProxy = await FundItProxyFactory.deploy(fundIt.address, fundItStorage.address, initPayload);
+    // await fundItProxy.deployed();
   
     // Create a new instance of the FundIt contract using the proxy's address
-    fundIt = FundItFactory.attach(fundItProxy.address);
-  });
+    // fundIt = FundItFactory.attach(fundItProxy.address);
+  // });
   
+  beforeEach(async function () {
+    const deployedContracts = await deployContracts();
+    fundItStorage = deployedContracts.fundItStorage;
+    fundIt = deployedContracts.fundIt;
+    fundItDeployer = deployedContracts.fundItDeployer;
+    fundItProxy = deployedContracts.fundItProxy;
+  });
+
+
   // Test proper deployment of all contracts
   describe("Deployment", function () {
     it("Should deploy FundItStorage with the correct initial state", async function () {

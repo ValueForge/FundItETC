@@ -1,6 +1,6 @@
 const hre = require('hardhat');
 
-async function main() {
+async function deployContracts() {
   const [deployer] = await hre.ethers.getSigners();
 
   console.log('Deploying contracts with the account:', deployer.address);
@@ -33,11 +33,16 @@ async function main() {
   await fundItProxy.deployed();
 
   console.log('FundItProxy deployed to:', fundItProxy.address);
+  return {fundItStorage, fundIt, fundItDeployer, fundItProxy};
 }
 
-main()
+deployContracts()
   .then(() => process.exit(0))
   .catch((error) => {
     console.error(error);
     process.exit(1);
   });
+
+module.exports = {
+  deployContracts,
+};
