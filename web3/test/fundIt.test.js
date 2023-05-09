@@ -62,7 +62,6 @@ describe("FundItTest", function () {
     fundItProxy = deployedContracts.fundItProxy;
   });
 
-
   // Test proper deployment of all contracts
   describe("Deployment", function () {
     it("Should deploy FundItStorage with the correct initial state", async function () {
