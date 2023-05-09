@@ -27,7 +27,7 @@ async function deployContracts() {
   console.log('FundItDeployer (ProxyAdmin) deployed to:', fundItDeployer.address);
 
   // Deploy FundItProxy.sol (Proxy)
-  const initData = [fundItStorage.address]; // Pass any initData required by the Implementation contract, if needed
+ const initPayload = fundIt.interface.encodeFunctionData("initialize", [fundItStorage.address]);
   const FundItProxy = await hre.ethers.getContractFactory('FundItProxy');
   const fundItProxy = await FundItProxy.deploy(fundIt.address, fundItDeployer.address, initData);
   await fundItProxy.deployed();
