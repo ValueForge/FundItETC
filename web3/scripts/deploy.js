@@ -14,7 +14,7 @@ async function deployContracts() {
 
   // Deploy FundIt.sol (Implementation)
   const FundIt = await hre.ethers.getContractFactory('FundIt');
-  const fundIt = await FundIt.deploy(fundItStorage.address);
+  const fundIt = await FundIt.deploy();
   await fundIt.deployed();
 
   console.log('FundIt (Implementation) deployed to:', fundIt.address);
@@ -32,7 +32,8 @@ async function deployContracts() {
   const fundItProxy = await FundItProxy.deploy(fundIt.address, fundItDeployer.address, initPayload);
   await fundItProxy.deployed();
 
-  console.log('FundItProxy deployed to:', fundItProxy.address);
+  console.log('FundItProxy (Proxy) deployed to:', fundItProxy.address);
+
   return {fundItStorage, fundIt, fundItDeployer, fundItProxy};
 }
 
