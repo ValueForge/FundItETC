@@ -221,12 +221,12 @@ contract FundIt is IFundIt, FundItStorage, Initializable, PausableUpgradeable, R
     }
 
     // Function to pause the contract
-    function pause() external onlyOwner {
+    function pause() external {
         _pause();
     }
 
     // Function to unpause the contract
-    function unpause() external onlyOwner {
+    function unpause() external {
         _unpause();
     }
 }
