@@ -1,30 +1,30 @@
-const hre = require('hardhat');
+// const hre = require('hardhat');
 
-async function deployContracts() {
+//async function deployContracts() {
   const [deployer] = await hre.ethers.getSigners();
 
-  console.log('Deploying contracts with the account:', deployer.address);
+  console.log('deployContracts: Deploying contracts with the account:', deployer.address);
 
   // Deploy FundItStorage.sol
   const FundItStorage = await hre.ethers.getContractFactory('FundItStorage');
   const fundItStorage = await FundItStorage.deploy();
   await fundItStorage.deployed();
 
-  console.log('FundItStorage deployed to:', fundItStorage.address);
+  console.log('deployContracts: FundItStorage deployed to:', fundItStorage.address);
 
   // Deploy FundIt.sol (Implementation)
   const FundIt = await hre.ethers.getContractFactory('FundIt');
   const fundIt = await FundIt.deploy();
   await fundIt.deployed();
 
-  console.log('FundIt (Implementation) deployed to:', fundIt.address);
+  console.log('deployContracts: FundIt (Implementation) deployed to:', fundIt.address);
 
   // Deploy FundItDeployer.sol (ProxyAdmin)
   const FundItDeployer = await hre.ethers.getContractFactory('FundItDeployer');
   const fundItDeployer = await FundItDeployer.deploy();
   await fundItDeployer.deployed();
 
-  console.log('FundItDeployer (ProxyAdmin) deployed to:', fundItDeployer.address);
+  console.log('deployContracts: FundItDeployer (ProxyAdmin) deployed to:', fundItDeployer.address);
 
   // Deploy FundItProxy.sol (Proxy)
   const initPayload = fundIt.interface.encodeFunctionData("initialize", [fundItStorage.address]);
@@ -32,7 +32,7 @@ async function deployContracts() {
   const fundItProxy = await FundItProxy.deploy(fundIt.address, fundItDeployer.address, initPayload);
   await fundItProxy.deployed();
 
-  console.log('FundItProxy (Proxy) deployed to:', fundItProxy.address);
+  console.log('deployContracts: FundItProxy (Proxy) deployed to:', fundItProxy.address);
 
   return {fundItStorage, fundIt, fundItDeployer, fundItProxy};
 }
