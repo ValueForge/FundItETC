@@ -40,7 +40,7 @@ describe("FundItTest", function () {
     await fundIt.deployed();
   
     console.log('FundItTest: FundIt (Implementation) deployed to:', fundIt.address);
-  
+
     // Deploy FundItDeployer.sol (ProxyAdmin)
     const FundItDeployer = await ethers.getContractFactory('FundItDeployer');
     const fundItDeployer = await FundItDeployer.deploy();

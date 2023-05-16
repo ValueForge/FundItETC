@@ -35,7 +35,6 @@
   console.log('deployContracts: FundItProxy (Proxy) deployed to:', fundItProxy.address);
 
   return {fundItStorage, fundIt, fundItDeployer, fundItProxy};
-}
 
 deployContracts()
   .then(() => process.exit(0))

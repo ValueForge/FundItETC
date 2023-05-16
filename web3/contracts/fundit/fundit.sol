@@ -93,7 +93,7 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
     }
 
     /// @dev Returns the list of donors for a specific campaign.
-    function getCampaignDonors(uint256 _id) external view override campaignExists(_id) returns (address[] memory) {
+    function getCampaignDonors(uint256 _id) external view override campaignExists(_id) returns (address[] memory, uint256[] memory) {
         return _storage.getCampaignDonors(_id);
     }
 
@@ -116,7 +116,7 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
      * @dev Allows the campaign owner to withdraw funds from the campaign.
      * Emits a Withdrawn event.
      */
-    function withdraw(uint256 _id, uint256 _amount) external override nonReentrant whenNotPaused campaignExists(_id) {
+    function withdraw(uint256 _id, uint256 _amount) external nonReentrant whenNotPaused campaignExists(_id) {
         require(_amount > 0, "Withdrawal amount must be greater than 0");
 
         Campaign memory campaign = _storage.getCampaign(_id);
@@ -132,12 +132,12 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
     }
 
     /// @dev Returns the details of a specific campaign.
-    function getCampaign(uint256 _id) external view override campaignExists(_id) returns (Campaign memory) {
+    function getCampaign(uint256 _id) external view campaignExists(_id) returns (Campaign memory) {
         return _storage.getCampaign(_id);
     }
 
     /// @dev Returns the total number of campaigns.
-    function getNumberOfCampaigns() external view override returns (uint256) {
+    function getNumberOfCampaigns() external view returns (uint256) {
         return _storage.getNumberOfCampaigns();
     }
 

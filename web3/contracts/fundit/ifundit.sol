@@ -27,11 +27,5 @@ interface IFundIt {
 
     function getCampaignDonors(uint256 _id) external view returns (address[] memory, uint256[] memory);
 
-    function getActiveCampaigns() external view returns (Campaign[] memory);
-
-    function getEndedCampaigns() external view returns (Campaign[] memory);
-
     function endCampaign(uint256 _id) external;
-
-    function withdrawFunds(uint256 _id) external;
 }
