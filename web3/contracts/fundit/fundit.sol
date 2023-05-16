@@ -10,226 +10,144 @@ import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 
 /// @custom:security-contact app.valueforge@gmail.com
-
-// The FundIt contract inherits from IFundIt, FundItStorage, PausableUpgradeable,
-// Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeable contracts
-// and uses SafeMathUpgradeable library
-contract FundIt is IFundIt, FundItStorage, Initializable, OwnableUpgradeable, PausableUpgradeable, ReentrancyGuardUpgradeable {
+/**
+ * @title FundIt Contract
+ * @dev This contract enables users to create, manage, and donate to crowdfunding campaigns.
+ * It uses a separate storage contract for storing the state of campaigns.
+ */
+contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeable, ReentrancyGuardUpgradeable {
     using SafeMathUpgradeable for uint256;
 
-    // Variable declaration to cap campaign duration at 180 days
     uint256 maxDuration = 15552000;
 
-    // Variable declaration to store the FundItStorage contract address
     FundItStorage private _storage;
 
-    // Event emitted when a new campaign is created
     event CampaignCreated(uint256 indexed campaignId, address indexed owner);
-
-    // Event emitted when a donation is made to a campaign
     event DonationMade(uint256 indexed campaignId, address indexed donor, uint256 amount);
-
-    // Event emitted when a campaign is ended by its owner
     event CampaignEnded(uint256 indexed campaignId, address indexed owner);
+    event Withdrawn(uint256 indexed campaignId, address indexed owner, uint256 amount);
 
-    // Event emitted when a campaign owner withdraws funds
-    event Withdrawn(uint256 indexed campaignId, address indexed owner, uint256 amount); 
-
-    // Modifier to check if a campaign with the given ID exists
+    /// @dev Modifier to check if a campaign exists.
     modifier campaignExists(uint256 _id) {
         require(_id < _storage.getNumberOfCampaigns(), "Campaign does not exist");
         _;
-        }
+    }
 
-    // Function to initialize contract state
+    /// @dev Initializes the contract with the address of the storage contract.
     function initialize(address _storageAddress) external initializer {
         __Pausable_init();
         __ReentrancyGuard_init();
-        
+
         _storage = FundItStorage(_storageAddress);
     }
 
-    // Function to create a new campaign
+    /**
+     * @dev Creates a new campaign.
+     * Emits a CampaignCreated event.
+     */
     function createCampaign(
         string calldata _title,
         string calldata _description,
         uint256 _target,
         uint256 _duration,
         string calldata _image
-        ) external override nonReentrant whenNotPaused {
-            
-             // Validation checks
-            require(bytes(_title).length > 0, "Title is required");
-            require(bytes(_description).length > 0, "Description is required");
-            require(_target > 0, "Target amount must be greater than 0");
-            require(_duration > 0, "Campaign duration must be greater than 0");
-            require(_duration.mul(24 * 60 * 60) <= maxDuration, "Campaign duration exceeds maximum limit");
+    ) external override nonReentrant whenNotPaused {
+        require(bytes(_title).length > 0, "Title is required");
+        require(bytes(_description).length > 0, "Description is required");
+        require(_target > 0, "Target amount must be greater than 0");
+        require(_duration > 0, "Campaign duration must be greater than 0");
+        require(_duration.mul(24 * 60 * 60) <= maxDuration, "Campaign duration exceeds maximum limit");
 
+        uint256 newCampaignId = _storage.createCampaign(
+            payable(msg.sender), 
+            _title, 
+            _description, 
+            _target, 
+            block.timestamp.add(_duration.mul(24 * 60 * 60)), 
+            _image
+        );
 
-            // Create a new campaign and store it in the campaigns mapping
-            Campaign storage campaign = _storage.getCampaigns()[_storage.getNumberOfCampaigns()];
-            campaign.owner = payable(msg.sender);
-            campaign.title = _title;
-            campaign.description = _description;
-            campaign.target = _target;
-            campaign.deadline = block.timestamp.add(_duration.mul(24 * 60 * 60));
-            campaign.image = _image;
-            campaign.active = true;
-            
-            // Emit the CampaignCreated event
-            emit CampaignCreated(_storage.getNumberOfCampaigns(), msg.sender);
-            
-            // Increment the numberOfCampaigns counter
-            _storage.incrementCampaigns();
+        emit CampaignCreated(newCampaignId, msg.sender);
     }
 
-    // Function to process donations to a campaign
-    function donateToCampaign(uint256 _id) external payable override
-    nonReentrant whenNotPaused campaignExists(_id) {
-        // Validation checks
+    /**
+     * @dev Allows a user to donate to a campaign.
+     * Emits a DonationMade event.
+     */
+    function donateToCampaign(uint256 _id) external payable override nonReentrant whenNotPaused campaignExists(_id) {
         require(msg.value > 0, "Donation amount must be greater than 0");
 
-        Campaign storage campaign = _storage.getCampaign(_id);
+        Campaign memory campaign = _storage.getCampaign(_id);
 
         require(campaign.active, "Campaign is not active");
         require(campaign.deadline > block.timestamp, "Campaign has ended");
 
-        // Update the campaign's donors and donations arrays
-        campaign.donors.push(msg.sender);
-        campaign.donations.push(msg.value);
+        _storage.recordDonation(_id, msg.sender, msg.value);
 
-        // Update the campaign's amountCollected
-        campaign.amountCollected = campaign.amountCollected.add(msg.value);
-
-        // Emit the DonationMade event
         emit DonationMade(_id, msg.sender, msg.value);
     }
 
-    // Function to receive and revert direct payments to contract
+    /// @dev Fallback function that does not accept Ether.
     receive() external payable {
         revert("FundIt does not accept direct payments");
     }
 
-    // Function to list donors to a campaign
-    function getCampaignDonors(uint256 _id)
-    external view override campaignExists(_id)
-    returns (address[] memory, uint256[] memory) {
-        Campaign storage campaign = _storage.getCampaign(_id);
-
-        return (campaign.donors, campaign.donations);
+    /// @dev Returns the list of donors for a specific campaign.
+    function getCampaignDonors(uint256 _id) external view override campaignExists(_id) returns (address[] memory) {
+        return _storage.getCampaignDonors(_id);
     }
 
-    // Function to list active campaigns
-    function getActiveCampaigns() external view override returns (Campaign[] memory) {
-        uint256 activeCampaignsCount = 0;
+    /**
+     * @dev Ends a campaign.
+     * Emits a CampaignEnded event.
+     */
+    function endCampaign(uint256 _id) external override nonReentrant whenNotPaused campaignExists(_id) {
+        Campaign memory campaign = _storage.getCampaign(_id);
 
-        // Count active campaigns
-        for (uint256 i = 0; i < _storage.getNumberOfCampaigns(); i++) {
-            Campaign storage campaign = _storage.getCampaign(i);
+        require(campaign.owner == msg.sender, "Only the campaign owner can end the campaign");
+        require(campaign.active, "Campaign is already ended");
 
-            if (campaign.active && campaign.deadline > block.timestamp) {
-                activeCampaignsCount++;
-            }
-        }
+        _storage.endCampaign(_id);
 
-        // Create a new dynamic array to store active campaigns
-        Campaign[] memory activeCampaigns = new Campaign[](activeCampaignsCount);
-        uint256 activeIndex = 0;
-
-        // Iterate through all campaigns and populate the activeCampaigns array
-        for (uint256 i = 0; i < _storage.getNumberOfCampaigns(); i++) {
-            Campaign storage campaign = _storage.getCampaign(i);
-
-            if (campaign.active && campaign.deadline > block.timestamp) {
-                activeCampaigns[activeIndex] = campaign;
-                activeIndex++;
-            }
-        }
-
-        return activeCampaigns;
-    }
-
-    // Function to list ended campaigns
-    function getEndedCampaigns() external view override returns (Campaign[] memory) {
-        uint256 endedCampaignsCount = 0;
-
-        // Count ended campaigns
-        for (uint256 i = 0; i < _storage.getNumberOfCampaigns(); i++) {
-            Campaign storage campaign = _storage.getCampaign(i);
-
-            if (!campaign.active || campaign.deadline <= block.timestamp) {
-                endedCampaignsCount++;
-            }
-        }
-
-        // Create a new dynamic array to store ended campaigns
-        Campaign[] memory endedCampaigns = new Campaign[](endedCampaignsCount);
-        uint256 endedIndex = 0;
-
-        // Iterate through all campaigns and populate the endedCampaigns array
-        for (uint256 i = 0; i < _storage.getNumberOfCampaigns(); i++) {
-            Campaign storage campaign = _storage.getCampaign(i);
-
-            if (!campaign.active || campaign.deadline <= block.timestamp) {
-                endedCampaigns[endedIndex] = campaign;
-                endedIndex++;
-            }
-        }
-
-        return endedCampaigns;
-    }
-
-    // Function to end a campaign
-    function endCampaign(uint256 _id) external override nonReentrant whenNotPaused campaignExists(_id) { 
-        Campaign storage campaign = _storage.getCampaign(_id);
-
-        // Validation check
-        require(campaign.active, "Campaign is not active");
-        require(campaign.owner == msg.sender, "You are not the campaign owner");
-        require(campaign.amountCollected == 0, "The collected funds have not been withdrawn yet!");
-
-        // Set the campaign as inactive
-        campaign.active = false;
-
-        // Emit the CampaignEnded event
         emit CampaignEnded(_id, msg.sender);
     }
 
-    // Function to withdraw funds donated to campaign owner (ends campaign)
-    function withdrawFunds(uint256 _id) external override nonReentrant whenNotPaused  {
-        Campaign storage campaign = _storage.getCampaign(_id);
+    /**
+     * @dev Allows the campaign owner to withdraw funds from the campaign.
+     * Emits a Withdrawn event.
+     */
+    function withdraw(uint256 _id, uint256 _amount) external override nonReentrant whenNotPaused campaignExists(_id) {
+        require(_amount > 0, "Withdrawal amount must be greater than 0");
 
-        // Validation checks -- Uncomment to activate
+        Campaign memory campaign = _storage.getCampaign(_id);
+
         require(campaign.owner == msg.sender, "Only the campaign owner can withdraw funds");
-        // require(campaign.amountCollected >= campaign.target, "Funds can only be withdrawn if the campaign reached its target");
-        require(block.timestamp >= campaign.deadline, "Funds can only be withdrawn after the deadline");
-        // require(campaign.active, "The campaign must be active");
-        
-        // Prepare withdrawal amount
-        uint256 amount = campaign.amountCollected;
-        
-        // Send donated funds to campaign owner
-        (bool success, ) = campaign.owner.call{value: amount}("");
-        require(success, "Withdrawal failed");
+        require(campaign.active == false, "Campaign is still active");
+        require(campaign.raised >= _amount, "Insufficient funds in the campaign");
 
-        // Set the campaign as inactive
-        campaign.amountCollected = 0;
-        campaign.active = false;
-        
-        // Emit the Withdrawn and CampaignEnded events
-        emit Withdrawn(_id, msg.sender, amount);
-        emit CampaignEnded(_id, msg.sender);
+        _storage.withdraw(_id, _amount);
+        payable(msg.sender).transfer(_amount);
+
+        emit Withdrawn(_id, msg.sender, _amount);
     }
 
-    // Function to pause the contract
+    /// @dev Returns the details of a specific campaign.
+    function getCampaign(uint256 _id) external view override campaignExists(_id) returns (Campaign memory) {
+        return _storage.getCampaign(_id);
+    }
+
+    /// @dev Returns the total number of campaigns.
+    function getNumberOfCampaigns() external view override returns (uint256) {
+        return _storage.getNumberOfCampaigns();
+    }
+
+    /// @dev Pauses the contract, preventing any actions.
     function pause() external onlyOwner {
         _pause();
     }
 
-    // Function to unpause the contract
+    /// @dev Unpauses the contract, allowing actions to be taken.
     function unpause() external onlyOwner {
         _unpause();
     }
 }
-
-
