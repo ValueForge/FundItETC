@@ -4,6 +4,7 @@ pragma solidity 0.8.9;
 import "./IFundIt.sol";
 import "./FundItStorage.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol"
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
@@ -36,7 +37,7 @@ contract FundIt is IFundIt, FundItStorage, Initializable, PausableUpgradeable, R
 
     // Modifier to check if a campaign with the given ID exists
     modifier campaignExists(uint256 _id) {
-        require(_id < numberOfCampaigns, "Campaign does not exist");
+        require(_id < _storage.numberOfCampaigns, "Campaign does not exist");
         _;
         }
 
@@ -66,7 +67,7 @@ contract FundIt is IFundIt, FundItStorage, Initializable, PausableUpgradeable, R
 
 
             // Create a new campaign and store it in the campaigns mapping
-            Campaign storage campaign = campaigns[numberOfCampaigns];
+            Campaign storage campaign = _storage.campaigns[_storage.numberOfCampaigns];
             campaign.owner = payable(msg.sender);
             campaign.title = _title;
             campaign.description = _description;
@@ -76,10 +77,10 @@ contract FundIt is IFundIt, FundItStorage, Initializable, PausableUpgradeable, R
             campaign.active = true;
             
             // Emit the CampaignCreated event
-            emit CampaignCreated(numberOfCampaigns, msg.sender);
+            emit CampaignCreated(_storage.numberOfCampaigns, msg.sender);
             
             // Increment the numberOfCampaigns counter
-            numberOfCampaigns++;
+            _storage.numberOfCampaigns++;
     }
 
     // Function to process donations to a campaign
@@ -88,7 +89,7 @@ contract FundIt is IFundIt, FundItStorage, Initializable, PausableUpgradeable, R
         // Validation checks
         require(msg.value > 0, "Donation amount must be greater than 0");
 
-        Campaign storage campaign = campaigns[_id];
+        Campaign storage campaign = _storage.campaigns[_id];
 
         require(campaign.active, "Campaign is not active");
         require(campaign.deadline > block.timestamp, "Campaign has ended");
@@ -113,7 +114,7 @@ contract FundIt is IFundIt, FundItStorage, Initializable, PausableUpgradeable, R
     function getCampaignDonors(uint256 _id)
     external view override campaignExists(_id)
     returns (address[] memory, uint256[] memory) {
-        Campaign storage campaign = campaigns[_id];
+        Campaign storage campaign = _storage.campaigns[_id];
 
         return (campaign.donors, campaign.donations);
     }
@@ -123,8 +124,8 @@ contract FundIt is IFundIt, FundItStorage, Initializable, PausableUpgradeable, R
         uint256 activeCampaignsCount = 0;
 
         // Count active campaigns
-        for (uint256 i = 0; i < numberOfCampaigns; i++) {
-            Campaign storage campaign = campaigns[i];
+        for (uint256 i = 0; i < _storage.numberOfCampaigns; i++) {
+            Campaign storage campaign = _storage.campaigns[i];
 
             if (campaign.active && campaign.deadline > block.timestamp) {
                 activeCampaignsCount++;
@@ -136,8 +137,8 @@ contract FundIt is IFundIt, FundItStorage, Initializable, PausableUpgradeable, R
         uint256 activeIndex = 0;
 
         // Iterate through all campaigns and populate the activeCampaigns array
-        for (uint256 i = 0; i < numberOfCampaigns; i++) {
-            Campaign storage campaign = campaigns[i];
+        for (uint256 i = 0; i < _storage.numberOfCampaigns; i++) {
+            Campaign storage campaign = _storage.campaigns[i];
 
             if (campaign.active && campaign.deadline > block.timestamp) {
                 activeCampaigns[activeIndex] = campaign;
@@ -153,8 +154,8 @@ contract FundIt is IFundIt, FundItStorage, Initializable, PausableUpgradeable, R
         uint256 endedCampaignsCount = 0;
 
         // Count ended campaigns
-        for (uint256 i = 0; i < numberOfCampaigns; i++) {
-            Campaign storage campaign = campaigns[i];
+        for (uint256 i = 0; i < _storage.numberOfCampaigns; i++) {
+            Campaign storage campaign = _storage.campaigns[i];
 
             if (!campaign.active || campaign.deadline <= block.timestamp) {
                 endedCampaignsCount++;
@@ -166,8 +167,8 @@ contract FundIt is IFundIt, FundItStorage, Initializable, PausableUpgradeable, R
         uint256 endedIndex = 0;
 
         // Iterate through all campaigns and populate the endedCampaigns array
-        for (uint256 i = 0; i < numberOfCampaigns; i++) {
-            Campaign storage campaign = campaigns[i];
+        for (uint256 i = 0; i < _storage.numberOfCampaigns; i++) {
+            Campaign storage campaign = _storage.campaigns[i];
 
             if (!campaign.active || campaign.deadline <= block.timestamp) {
                 endedCampaigns[endedIndex] = campaign;
@@ -180,7 +181,7 @@ contract FundIt is IFundIt, FundItStorage, Initializable, PausableUpgradeable, R
 
     // Function to end a campaign
     function endCampaign(uint256 _id) external override nonReentrant whenNotPaused campaignExists(_id) { 
-        Campaign storage campaign = campaigns[_id];
+        Campaign storage campaign = _storage.campaigns[_id];
 
         // Validation check
         require(campaign.active, "Campaign is not active");
@@ -196,7 +197,7 @@ contract FundIt is IFundIt, FundItStorage, Initializable, PausableUpgradeable, R
 
     // Function to withdraw funds donated to campaign owner (ends campaign)
     function withdrawFunds(uint256 _id) external override nonReentrant whenNotPaused  {
-        Campaign storage campaign = campaigns[_id];
+        Campaign storage campaign = _storage.campaigns[_id];
 
         // Validation checks -- Uncomment to activate
         require(campaign.owner == msg.sender, "Only the campaign owner can withdraw funds");
@@ -221,12 +222,12 @@ contract FundIt is IFundIt, FundItStorage, Initializable, PausableUpgradeable, R
     }
 
     // Function to pause the contract
-    function pause() external {
+    function pause() external onlyOwner {
         _pause();
     }
 
     // Function to unpause the contract
-    function unpause() external {
+    function unpause() external onlyOwner {
         _unpause();
     }
 }
