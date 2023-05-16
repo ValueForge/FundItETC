@@ -80,7 +80,7 @@ contract FundIt is IFundIt, FundItStorage, Initializable, OwnableUpgradeable, Pa
             emit CampaignCreated(_storage.getNumberOfCampaigns(), msg.sender);
             
             // Increment the numberOfCampaigns counter
-            _storage.numberOfCampaigns++;
+            _storage.incrementCampaigns();
     }
 
     // Function to process donations to a campaign
@@ -89,7 +89,7 @@ contract FundIt is IFundIt, FundItStorage, Initializable, OwnableUpgradeable, Pa
         // Validation checks
         require(msg.value > 0, "Donation amount must be greater than 0");
 
-        Campaign storage campaign = _storage.getCampaigns()[_id];
+        Campaign storage campaign = _storage.getCampaign(_id);
 
         require(campaign.active, "Campaign is not active");
         require(campaign.deadline > block.timestamp, "Campaign has ended");
@@ -114,7 +114,7 @@ contract FundIt is IFundIt, FundItStorage, Initializable, OwnableUpgradeable, Pa
     function getCampaignDonors(uint256 _id)
     external view override campaignExists(_id)
     returns (address[] memory, uint256[] memory) {
-        Campaign storage campaign = _storage.getCampaigns()[_id];
+        Campaign storage campaign = _storage.getCampaign(_id);
 
         return (campaign.donors, campaign.donations);
     }
@@ -125,7 +125,7 @@ contract FundIt is IFundIt, FundItStorage, Initializable, OwnableUpgradeable, Pa
 
         // Count active campaigns
         for (uint256 i = 0; i < _storage.getNumberOfCampaigns(); i++) {
-            Campaign storage campaign = _storage.getCampaigns()[i];
+            Campaign storage campaign = _storage.getCampaign(i);
 
             if (campaign.active && campaign.deadline > block.timestamp) {
                 activeCampaignsCount++;
@@ -138,7 +138,7 @@ contract FundIt is IFundIt, FundItStorage, Initializable, OwnableUpgradeable, Pa
 
         // Iterate through all campaigns and populate the activeCampaigns array
         for (uint256 i = 0; i < _storage.getNumberOfCampaigns(); i++) {
-            Campaign storage campaign = _storage.getCampaigns()[i];
+            Campaign storage campaign = _storage.getCampaign(i);
 
             if (campaign.active && campaign.deadline > block.timestamp) {
                 activeCampaigns[activeIndex] = campaign;
@@ -155,7 +155,7 @@ contract FundIt is IFundIt, FundItStorage, Initializable, OwnableUpgradeable, Pa
 
         // Count ended campaigns
         for (uint256 i = 0; i < _storage.getNumberOfCampaigns(); i++) {
-            Campaign storage campaign = _storage.getCampaigns()[i];
+            Campaign storage campaign = _storage.getCampaign(i);
 
             if (!campaign.active || campaign.deadline <= block.timestamp) {
                 endedCampaignsCount++;
@@ -168,7 +168,7 @@ contract FundIt is IFundIt, FundItStorage, Initializable, OwnableUpgradeable, Pa
 
         // Iterate through all campaigns and populate the endedCampaigns array
         for (uint256 i = 0; i < _storage.getNumberOfCampaigns(); i++) {
-            Campaign storage campaign = _storage.getCampaigns()[i];
+            Campaign storage campaign = _storage.getCampaign(i);
 
             if (!campaign.active || campaign.deadline <= block.timestamp) {
                 endedCampaigns[endedIndex] = campaign;
@@ -181,7 +181,7 @@ contract FundIt is IFundIt, FundItStorage, Initializable, OwnableUpgradeable, Pa
 
     // Function to end a campaign
     function endCampaign(uint256 _id) external override nonReentrant whenNotPaused campaignExists(_id) { 
-        Campaign storage campaign = _storage.getCampaigns()[_id];
+        Campaign storage campaign = _storage.getCampaign(_id);
 
         // Validation check
         require(campaign.active, "Campaign is not active");
@@ -197,7 +197,7 @@ contract FundIt is IFundIt, FundItStorage, Initializable, OwnableUpgradeable, Pa
 
     // Function to withdraw funds donated to campaign owner (ends campaign)
     function withdrawFunds(uint256 _id) external override nonReentrant whenNotPaused  {
-        Campaign storage campaign = _storage.getCampaigns()[_id];
+        Campaign storage campaign = _storage.getCampaign(_id);
 
         // Validation checks -- Uncomment to activate
         require(campaign.owner == msg.sender, "Only the campaign owner can withdraw funds");
@@ -231,3 +231,5 @@ contract FundIt is IFundIt, FundItStorage, Initializable, OwnableUpgradeable, Pa
         _unpause();
     }
 }
+
+
