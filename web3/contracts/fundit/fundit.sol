@@ -12,9 +12,9 @@ import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 /// @custom:security-contact app.valueforge@gmail.com
 
 // The FundIt contract inherits from IFundIt, FundItStorage, PausableUpgradeable,
-// Initializable, ReentrancyGuardUpgradeable contracts
+// Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeable contracts
 // and uses SafeMathUpgradeable library
-contract FundIt is IFundIt, FundItStorage, Initializable, PausableUpgradeable, ReentrancyGuardUpgradeable {
+contract FundIt is IFundIt, FundItStorage, Initializable, OwnableUpgradeable, PausableUpgradeable, ReentrancyGuardUpgradeable {
     using SafeMathUpgradeable for uint256;
 
     // Variable declaration to cap campaign duration at 180 days
