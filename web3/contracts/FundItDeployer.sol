@@ -13,17 +13,18 @@ contract FundItDeployer is OwnableUpgradeable {
     ProxyAdmin public proxyAdmin;
     TransparentUpgradeableProxy public proxy;
     FundIt public fundIt;
+    FundItStorage public _storage;
 
     constructor() {
         proxyAdmin = new ProxyAdmin();
         fundIt = new FundIt();
-        storage = new FundItStorage();
+        _storage = new FundItStorage();
 
         // Create the proxy contract and link it to the logic contract
         proxy = new TransparentUpgradeableProxy(
             address(fundIt),
             address(proxyAdmin),
-            address(storage)  // This parameter can be used to initialize the FundIt contract, if needed
+            address(_storage)  // This parameter can be used to initialize the FundIt contract, if needed
         );
     }
 }
