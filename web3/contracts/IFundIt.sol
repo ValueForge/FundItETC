@@ -3,6 +3,7 @@ pragma solidity 0.8.9;
 
 interface IFundIt {
     struct Campaign {
+        uint256 id;
         address payable owner;
         string title;
         string description;

@@ -15,7 +15,7 @@ import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
  * @dev This contract enables users to create, manage, and donate to crowdfunding campaigns.
  * It uses a separate storage contract for storing the state of campaigns.
  */
-contract FundIt is IFundIt, FundItStorage, Initializable, OwnableUpgradeable, PausableUpgradeable, ReentrancyGuardUpgradeable {
+contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeable, ReentrancyGuardUpgradeable {
     using SafeMathUpgradeable for uint256;
 
     uint256 maxDuration = 15552000;
@@ -60,15 +60,9 @@ contract FundIt is IFundIt, FundItStorage, Initializable, OwnableUpgradeable, Pa
         require(_duration > 0, "Campaign duration must be greater than 0");
         require(_duration.mul(24 * 60 * 60) <= maxDuration, "Campaign duration exceeds maximum limit");
 
-        uint256 newCampaignId = this.createCampaign(
-            payable(msg.sender), 
-            _title, 
-            _description, 
-            _target, 
-            block.timestamp.add(_duration.mul(24 * 60 * 60)), 
-            _image
-        );
-
+        _storage._addCampaign(_owner, _title, _description, _target,
+            block.timestamp.add(_duration.mul(24 * 60 * 60)), _image);
+        
         emit CampaignCreated(newCampaignId, msg.sender);
     }
 

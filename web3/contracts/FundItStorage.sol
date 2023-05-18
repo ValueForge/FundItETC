@@ -7,13 +7,13 @@ import "./IFundIt.sol";
  * @title FundItStorage
  * @dev This contract stores all the campaigns for the FundIt platform.
  */
-abstract contract FundItStorage is IFundIt {
+abstract contract FundItStorage {
 
     // Mapping from campaign ID to Campaign struct
     mapping(uint256 => IFundIt.Campaign) private campaigns;
 
     // Total number of campaigns
-    uint256 private numberOfCampaigns = 0;
+    uint256 public numberOfCampaigns = 0;
 
     /**
      * @dev Internal function to add a new campaign. This can only be used by this contract.
