@@ -62,12 +62,12 @@ describe("FundItTest", function () {
   // Test for proper deployment of all contracts
   describe("Deployment", function () {
     it("Should deploy FundItStorage with the correct initial state", async function () {
-      expect(await fundItStorage.numberOfCampaigns()).to.equal(0);
+      expect(await fundItStorage.getNumberOfCampaigns()).to.equal(0);
     });
 
     it("Should deploy FundItProxy with the correct initial state", async function () {
-      const proxyAdmin = new ethers.Contract(fundItStorage.address, ProxyAdmin.abi, owner);
-      expect(await proxyAdmin.getProxyAdmin(fundItProxy.address)).to.equal(fundItStorage.address);
+      const proxyAdmin = new ethers.Contract(fundIt.address, ProxyAdmin.abi, owner);
+      expect(await proxyAdmin.getProxyAdmin(fundItDeployer.address)).to.equal(proxyAdmin.address);
       expect(await proxyAdmin.getProxyImplementation(fundItProxy.address)).to.equal(fundIt.address);
     });
   });
