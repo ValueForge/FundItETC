@@ -20,11 +20,16 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
 
     uint256 maxDuration = 15552000;
 
+    uint256 campaignId;
+
     FundItStorage private _storage;
 
     event CampaignCreated(uint256 indexed campaignId, address indexed owner);
+
     event DonationMade(uint256 indexed campaignId, address indexed donor, uint256 amount);
+
     event CampaignEnded(uint256 indexed campaignId, address indexed owner);
+
     event Withdrawn(uint256 indexed campaignId, address indexed owner, uint256 amount);
 
     /// @dev Modifier to check if a campaign exists.
@@ -63,7 +68,7 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
         _storage._addCampaign(_owner, _title, _description, _target,
             block.timestamp.add(_duration.mul(24 * 60 * 60)), _image);
         
-        emit CampaignCreated(newCampaignId, msg.sender);
+        emit CampaignCreated(campaignId, msg.sender);
     }
 
        /**
