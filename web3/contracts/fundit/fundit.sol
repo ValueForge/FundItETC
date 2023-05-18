@@ -15,7 +15,7 @@ import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
  * @dev This contract enables users to create, manage, and donate to crowdfunding campaigns.
  * It uses a separate storage contract for storing the state of campaigns.
  */
-contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeable, ReentrancyGuardUpgradeable {
+contract FundIt is IFundIt, FundItStorage, Initializable, OwnableUpgradeable, PausableUpgradeable, ReentrancyGuardUpgradeable {
     using SafeMathUpgradeable for uint256;
 
     uint256 maxDuration = 15552000;
@@ -46,6 +46,7 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
      * Emits a CampaignCreated event.
      */
     function createCampaign(
+        address payable(msg.sender),
         string calldata _title,
         string calldata _description,
         uint256 _target,
@@ -58,7 +59,7 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
         require(_duration > 0, "Campaign duration must be greater than 0");
         require(_duration.mul(24 * 60 * 60) <= maxDuration, "Campaign duration exceeds maximum limit");
 
-        uint256 newCampaignId = _storage.createCampaign(
+        uint256 newCampaignId = this.createCampaign(
             payable(msg.sender), 
             _title, 
             _description, 
@@ -70,6 +71,24 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
         emit CampaignCreated(newCampaignId, msg.sender);
     }
 
+       /**
+     * @dev Function to get a specific campaign.
+     * @param _id The ID of the campaign to retrieve.
+     * @return A Campaign struct representing the specified campaign.
+     */
+    function getCampaign(uint256 _id) external view virtual returns (IFundIt.Campaign memory) {
+        require(_id < _storage.numberOfCampaigns, "Campaign does not exist");
+        return _storage.campaigns[_id];
+    }
+    
+    /**
+     * @dev Function to get the total number of campaigns.
+     * @return The total number of campaigns.
+     */
+    function getNumberOfCampaigns() external view virtual returns (uint256) {
+        return numberOfCampaigns;
+    }
+
     /**
      * @dev Allows a user to donate to a campaign.
      * Emits a DonationMade event.
@@ -77,7 +96,7 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
     function donateToCampaign(uint256 _id) external payable override nonReentrant whenNotPaused campaignExists(_id) {
         require(msg.value > 0, "Donation amount must be greater than 0");
 
-        Campaign memory campaign = _storage.getCampaign(_id);
+        Campaign memory campaign = this.getCampaign(_id);
 
         require(campaign.active, "Campaign is not active");
         require(campaign.deadline > block.timestamp, "Campaign has ended");
@@ -132,12 +151,12 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
     }
 
     /// @dev Returns the details of a specific campaign.
-    function getCampaign(uint256 _id) external view campaignExists(_id) returns (Campaign memory) {
+    function getCampaign(uint256 _id) external view override campaignExists(_id) returns (Campaign memory) {
         return _storage.getCampaign(_id);
     }
 
     /// @dev Returns the total number of campaigns.
-    function getNumberOfCampaigns() external view returns (uint256) {
+    function getNumberOfCampaigns() external view override returns (uint256) {
         return _storage.getNumberOfCampaigns();
     }
 

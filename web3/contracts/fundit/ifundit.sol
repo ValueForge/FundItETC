@@ -15,7 +15,8 @@ interface IFundIt {
         bool active;
     }
 
-    function createCampaign(
+    function createCampaign(    
+        address payable _owner,
         string calldata _title,
         string calldata _description,
         uint256 _target,
@@ -28,4 +29,6 @@ interface IFundIt {
     function getCampaignDonors(uint256 _id) external view returns (address[] memory, uint256[] memory);
 
     function endCampaign(uint256 _id) external;
+
+    function withdraw(uint256 _id, uint256 _amount) external;
 }
