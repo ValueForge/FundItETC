@@ -37,6 +37,7 @@ contract FundIt is IFundIt, FundItStorage, Initializable, OwnableUpgradeable, Pa
     function initialize(address _storageAddress) external initializer {
         __Pausable_init();
         __ReentrancyGuard_init();
+        __Ownable_init();
 
         _storage = FundItStorage(_storageAddress);
     }
@@ -46,7 +47,7 @@ contract FundIt is IFundIt, FundItStorage, Initializable, OwnableUpgradeable, Pa
      * Emits a CampaignCreated event.
      */
     function createCampaign(
-        address payable(msg.sender),
+        address payable _owner,
         string calldata _title,
         string calldata _description,
         uint256 _target,
@@ -86,7 +87,7 @@ contract FundIt is IFundIt, FundItStorage, Initializable, OwnableUpgradeable, Pa
      * @return The total number of campaigns.
      */
     function getNumberOfCampaigns() external view virtual returns (uint256) {
-        return numberOfCampaigns;
+        return _storage.numberOfCampaigns;
     }
 
     /**
@@ -148,16 +149,6 @@ contract FundIt is IFundIt, FundItStorage, Initializable, OwnableUpgradeable, Pa
         payable(msg.sender).transfer(_amount);
 
         emit Withdrawn(_id, msg.sender, _amount);
-    }
-
-    /// @dev Returns the details of a specific campaign.
-    function getCampaign(uint256 _id) external view override campaignExists(_id) returns (Campaign memory) {
-        return _storage.getCampaign(_id);
-    }
-
-    /// @dev Returns the total number of campaigns.
-    function getNumberOfCampaigns() external view override returns (uint256) {
-        return _storage.getNumberOfCampaigns();
     }
 
     /// @dev Pauses the contract, preventing any actions.

@@ -9,7 +9,7 @@ contract FundItProxy is TransparentUpgradeableProxy {
     constructor(
         address _logic,
         address _admin,
-        bytes memory _data
-    ) TransparentUpgradeableProxy(_logic, _admin, _data) {
+        address _storage
+    ) TransparentUpgradeableProxy(_logic, _admin, _storage) {
     }
 }

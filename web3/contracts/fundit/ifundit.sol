@@ -7,11 +7,11 @@ interface IFundIt {
         string title;
         string description;
         uint256 target;
-        uint256 deadline;
-        uint256 amountCollected;
+        uint256 duration;
         string image;
-        address[] donors;
-        uint256[] donations;
+        uint256 totalDonations;
+        address[] donorAddresses;
+        uint256[] donationAmounts;
         bool active;
     }
 
@@ -23,6 +23,10 @@ interface IFundIt {
         uint256 _duration,
         string calldata _image
     ) external;
+
+    function getCampaign(uint256 _id) external view returns (Campaign memory);
+
+    function getNumberOfCampaigns() external view returns (uint256);
 
     function donateToCampaign(uint256 _id) external payable;
 
