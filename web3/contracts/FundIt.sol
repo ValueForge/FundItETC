@@ -67,9 +67,8 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
 
         campaignId = this.getNumberOfCampaigns();
         uint256 _endDate = block.timestamp.add(_duration.mul(24 * 60 * 60));
-        newCampaign = IFundIt.Campaign;
 
-        _storage._addCampaign(newCampaign);
+        _storage._addCampaign(IFundIt.Campaign(campaignId, _owner, _title, _description, _target, _endDate, _image, 0, new address[](0), new uint256[](0), true));
            
         emit CampaignCreated(campaignId, msg.sender);
     }
