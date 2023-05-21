@@ -14,7 +14,7 @@ In order to get the repositories setup before contributions refer to the [README
 
 1. _Find a suitable issue_
 
-   If this is your first time look for an issue labeled [good first issue](https://github.com/dappnode/DNP_BIND/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) otherwise look for issues labeled [help wanted](https://github.com/dappnode/DNP_BIND/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22) . If another issue jumps out at you please engage on the issue before starting it.
+   If this is your first time look for an issue labeled [good first issue](https://github.com/ValueForge/FundItETC/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) otherwise look for issues labeled [help wanted](https://github.com/ValueForgeFundItETC/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22) . If another issue jumps out at you please engage on the issue before starting it.
 
 2. _Assign yourself the issue_
 
@@ -48,10 +48,10 @@ In order to get the repositories setup before contributions refer to the [README
 
 9. _Make noise!_
 
-   Get in our [Element](https://app.element.io/#/room/#DAppNode:matrix.org) and point to your new PR. Let us know you've tackled your first, third or 90th issue with us. We'll review it and everybody will get a warm feeling of accomplishment.
+   Get in our [Discord](https://discord.gg/yCZzDvfyzt) and point to your new PR. Let us know you've tackled your first, third or 90th issue with us. We'll review it and everybody will get a warm feeling of accomplishment.
 
 10. _rinse, repeat_
 
-    Find another issue, get more involved, make noise in our Riot, or find issues we may have missed. You've completed your first step to becoming a contributor. **You're helping to Decentralize the FUTURE**!
+    Find another issue, get more involved, make noise in our Disord, or find issues we may have missed. You've completed your first step to becoming a contributor. **You're helping to Decentralize the FUTURE**!
 
-If you still have any further questions about contribution feel free to reach out to `@eduadiez:matrix.org`, `@yalormewn:matrix.org`, `@liondapp:matrix.org`, or just make noise in the `#DAppNode` channel on [Element](https://app.element.io/#/room/#DAppNode:matrix.org).
+If you still have any questions about contribution feel free to reach out.
