@@ -8,7 +8,7 @@ interface IFundIt {
         string title;
         string description;
         uint256 target;
-        uint256 duration;
+        uint256 endDate;
         string image;
         uint256 totalDonations;
         address[] donorAddresses;

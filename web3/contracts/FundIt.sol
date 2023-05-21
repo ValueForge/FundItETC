@@ -34,7 +34,7 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
 
     /// @dev Modifier to check if a campaign exists.
     modifier campaignExists(uint256 _id) {
-        require(_id < _storage.getNumberOfCampaigns(), "Campaign does not exist");
+        require(_id < this.getNumberOfCampaigns(), "Campaign does not exist");
         _;
     }
 
@@ -65,9 +65,11 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
         require(_duration > 0, "Campaign duration must be greater than 0");
         require(_duration.mul(24 * 60 * 60) <= maxDuration, "Campaign duration exceeds maximum limit");
 
-        _storage._addCampaign(_owner, _title, _description, _target,
-            block.timestamp.add(_duration.mul(24 * 60 * 60)), _image);
-        
+        campaignId = this.getNumberOfCampaigns();
+        uint256 _endDate = block.timestamp.add(_duration.mul(24 * 60 * 60));
+
+        _storage._addCampaign(IFundIt.Campaign(campaignId, _owner, _title, _description, _target, _endDate, _image, 0, new address[](0), new uint256[](0), true));
+           
         emit CampaignCreated(campaignId, msg.sender);
     }
 
@@ -77,7 +79,7 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
      * @return A Campaign struct representing the specified campaign.
      */
     function getCampaign(uint256 _id) external view virtual returns (IFundIt.Campaign memory) {
-        require(_id < _storage.numberOfCampaigns, "Campaign does not exist");
+        require(_id < this.getNumberOfCampaigns(), "Campaign does not exist");
         return _storage.campaigns[_id];
     }
     
