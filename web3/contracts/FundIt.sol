@@ -34,7 +34,7 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
 
     /// @dev Modifier to check if a campaign exists.
     modifier campaignExists(uint256 _id) {
-        require(_id < _this.getNumberOfCampaigns(), "Campaign does not exist");
+        require(_id < this.getNumberOfCampaigns(), "Campaign does not exist");
         _;
     }
 
