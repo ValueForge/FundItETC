@@ -1,14 +1,14 @@
 # Contributing
 
-When bringing people on as contributors we prefer that they start with an issue tagged [good first issue](https://github.com/dappnode/DNP_BIND/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22).
+When bringing people on as contributors we prefer that they start with an issue tagged [good first issue](https://github.com/ValueForge/FundItETC/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22).
 
-After a contributor has shown they're a good fit and have completed 1 or 2 issues labeled [good first issue](https://github.com/dappnode/DNP_BIND/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) with pull requests that have been accepted feel free of moving on to other issues. We're thrilled to see new contributors.
+After a contributor has shown they're a good fit and have completed 1 or 2 issues labeled [good first issue](https://github.com/ValueForge/FundItETC/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) with pull requests that have been accepted, feel free to move on to other issues. We welcome new contributors.
 
-If you want to better understand how does the development process works, please refer to our [wiki pages](https://github.com/dappnode/DAppNode/wiki)
+If you want to better understand how the development process works, please refer to our as yet unwritten [wiki pages](null).
 
 ## Setup
 
-In order to get the repositories setup before contributions refer to the [README.md](https://github.com/dappnode/DAppNode/blob/master/README.md) file.
+In order to get the repositories setup before contributions refer to the [README.md](https://github.com/ValueForge/FundItETC/blob/main/README.md) file.
 
 ## Contribution Steps
 
