@@ -19,8 +19,8 @@ abstract contract FundItStorage {
      * @dev Internal function to add a new campaign. This can only be used by this contract.
      * @param _campaign The Campaign struct to store.
      */
-    function _addCampaign(IFundIt.Campaign memory _campaign) internal virtual {
-        campaigns[numberOfCampaigns] = _campaign;
+    function _addCampaign(newCampaign) internal virtual {
+        campaigns[numberOfCampaigns] = newCampaign;
         numberOfCampaigns++;
     }
 }

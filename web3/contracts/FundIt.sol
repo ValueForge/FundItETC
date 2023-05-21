@@ -65,9 +65,12 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
         require(_duration > 0, "Campaign duration must be greater than 0");
         require(_duration.mul(24 * 60 * 60) <= maxDuration, "Campaign duration exceeds maximum limit");
 
-        _storage._addCampaign(_owner, _title, _description, _target,
-            block.timestamp.add(_duration.mul(24 * 60 * 60)), _image);
-        
+        campaignId = this.getNumberOfCampaigns();
+        uint256 _endDate = block.timestamp.add(_duration.mul(24 * 60 * 60));
+        newCampaign = IFundIt.Campaign;
+
+        _storage._addCampaign(newCampaign)
+           
         emit CampaignCreated(campaignId, msg.sender);
     }
 
