@@ -34,7 +34,7 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
 
     /// @dev Modifier to check if a campaign exists.
     modifier campaignExists(uint256 _id) {
-        require(_id < _storage.getNumberOfCampaigns(), "Campaign does not exist");
+        require(_id < _this.getNumberOfCampaigns(), "Campaign does not exist");
         _;
     }
 
@@ -77,7 +77,7 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
      * @return A Campaign struct representing the specified campaign.
      */
     function getCampaign(uint256 _id) external view virtual returns (IFundIt.Campaign memory) {
-        require(_id < _storage.numberOfCampaigns, "Campaign does not exist");
+        require(_id < this.getNumberOfCampaigns(), "Campaign does not exist");
         return _storage.campaigns[_id];
     }
     
