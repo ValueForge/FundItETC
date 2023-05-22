@@ -23,4 +23,8 @@ abstract contract FundItStorage {
         campaigns[numberOfCampaigns] = _campaign;
         numberOfCampaigns++;
     }
+
+    function getCampaign(uint256 _id) public view returns (Campaign memory) {
+        return campaigns[_id];
+    }
 }

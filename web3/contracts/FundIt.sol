@@ -78,11 +78,11 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
      * @param _id The ID of the campaign to retrieve.
      * @return A Campaign struct representing the specified campaign.
      */
-    function getCampaign(uint256 _id) external view virtual returns (IFundIt.Campaign memory) {
-        require(_id < this.getNumberOfCampaigns(), "Campaign does not exist");
-        return _storage.campaigns[_id];
-    }
-    
+    function getCampaign(uint256 _id) external view virtual returns (IFundIt.Campaign memory) {  
+        require(_id < _storage.getNumberOfCampaigns(), "Campaign does not exist");  
+        return _storage.getCampaign(_id);  
+    }  
+
     /**
      * @dev Function to get the total number of campaigns.
      * @return The total number of campaigns.
