@@ -10,7 +10,7 @@ import "./IFundIt.sol";
 abstract contract FundItStorage {
 
     // Mapping from campaign ID to Campaign struct
-    mapping(uint256 => IFundIt.Campaign) private campaigns;
+    mapping(uint256 => IFundIt.Campaign) public campaigns;
 
     // Total number of campaigns
     uint256 public numberOfCampaigns = 0;
