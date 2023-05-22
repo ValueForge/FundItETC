@@ -68,9 +68,25 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
         campaignId = this.getNumberOfCampaigns();
         uint256 _endDate = block.timestamp.add(_duration.mul(24 * 60 * 60));
 
-        _storage._addCampaign(IFundIt.Campaign(campaignId, _owner, _title, _description, _target, _endDate, _image, 0, new address[](0), new uint256[](0), true));
-           
-        emit CampaignCreated(campaignId, msg.sender);
+        // Create the campaign struct
+       IFundIt.Campaign memory newCampaign = IFundIt.Campaign({
+            id: campaignId,
+            owner: _owner,
+            title: _title,
+            description: _description,
+            target: _target,
+            endDate: _endDate,
+            image: _image,
+            totalDonations: 0,
+            donorAddresses: new address[](0),
+            donationAmounts: new uint256[](0),
+            active: true,
+            amtRaised: 0
+        });
+
+       _storage.addCampaign(newCampaign);
+
+       emit CampaignCreated(_storage.getNumberOfCampaigns() - 1, _owner);
     }
 
        /**
@@ -88,7 +104,7 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
      * @return The total number of campaigns.
      */
     function getNumberOfCampaigns() external view virtual returns (uint256) {
-        return _storage.numberOfCampaigns;
+        return _storage.getNumberOfCampaigns();
     }
 
     /**
@@ -101,7 +117,7 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
         Campaign memory campaign = this.getCampaign(_id);
 
         require(campaign.active, "Campaign is not active");
-        require(campaign.deadline > block.timestamp, "Campaign has ended");
+        require(campaign.endDate > block.timestamp, "Campaign has ended");
 
         _storage.recordDonation(_id, msg.sender, msg.value);
 

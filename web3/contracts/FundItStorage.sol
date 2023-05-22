@@ -19,12 +19,41 @@ contract FundItStorage {
      * @dev Internal function to add a new campaign. This can only be used by this contract.
      * @param _campaign The Campaign struct to store.
      */
-    function _addCampaign(IFundIt.Campaign memory _campaign) public virtual {
+    function addCampaign(IFundIt.Campaign memory _campaign) external {
         campaigns[numberOfCampaigns] = _campaign;
         numberOfCampaigns++;
     }
 
-    function getCampaign(uint256 _id) public view returns (Campaign memory) {
+    /**
+     * @dev Exrernal function to get a campaign.
+     * @param _id The ID of the campaign to get.
+     */
+    function getCampaign(uint256 _id) external view returns (IFundIt.Campaign memory) {
         return campaigns[_id];
     }
+
+    /**
+     * @dev Exrernal function to get the total number of campaigns.
+     * @return The total number of campaigns.
+     */
+    function getNumberOfCampaigns() external view returns (uint256) {
+        return numberOfCampaigns;
+    }
+
+    /**
+     * @dev Exrernal function to record a donation.
+     * @param _id The ID of the campaign to record the donation for.
+     * @param _donor The address of the donor.
+     * @param _amount The amount of the donation.
+     */
+    function recordDonation(
+        uint256 _id,
+        address _donor,
+        uint256 _amount
+    ) external {
+        campaigns[_id].donorAddresses.push(_donor);
+        campaigns[_id].donationAmounts.push(_amount);
+        campaigns[_id].totalDonations += _amount;
+    }
+
 }
