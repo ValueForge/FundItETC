@@ -129,9 +129,12 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
         revert("FundIt does not accept direct payments");
     }
 
-    /// @dev Returns the list of donors for a specific campaign.
-    function getCampaignDonors(uint256 _id) external view override campaignExists(_id) returns (address[] memory, uint256[] memory) {
-        return _storage.getCampaignDonors(_id);
+    /** @dev Returns the list of donors for a specific campaign.
+     * @param _id The ID of the campaign to retrieve the donors for.
+     * @return An array of donor addresses and an array of donation amounts.
+     */
+    function getCampaignDonors(uint256 _id) external view override campaignExists(_id) {
+        returns (address[] memory, uint256[] memory) 
     }
 
     /**

@@ -56,4 +56,11 @@ contract FundItStorage {
         campaigns[_id].totalDonations += _amount;
     }
 
+    /**
+     * @dev Exrernal function to end a campaign.
+     * @param _id 
+     * @return 
+     * @return 
+     */
+    function getCampaignDonors(uint256 _id) external view returns (address[] memory, uint256[] memory) {
 }
