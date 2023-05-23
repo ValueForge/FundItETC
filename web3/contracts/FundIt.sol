@@ -135,7 +135,7 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
      */
     function getCampaignDonors(uint256 _id) external view override campaignExists(_id) {
         Campaign memory campaign = _storage.getCampaign(_id);
-        return (campaign.donorAddresses[] memory, campaign.donationAmounts[] memory) 
+        return (campaign.donorAddresses[], campaign.donationAmounts[]);
     }
 
     /**
