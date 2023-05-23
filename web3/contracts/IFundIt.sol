@@ -14,6 +14,7 @@ interface IFundIt {
         address[] donorAddresses;
         uint256[] donationAmounts;
         bool active;
+        uint256 amtRaised;
     }
 
     function createCampaign(    
@@ -26,8 +27,6 @@ interface IFundIt {
     ) external;
 
     function getCampaign(uint256 _id) external view returns (Campaign memory);
-
-    function getNumberOfCampaigns() external view returns (uint256);
 
     function donateToCampaign(uint256 _id) external payable;
 
