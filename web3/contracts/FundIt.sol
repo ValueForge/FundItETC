@@ -133,22 +133,22 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
      * @param _id The ID of the campaign to retrieve the donors for.
      * @return An array of donor addresses and an array of donation amounts.
      */
-    function getCampaignDonors(uint256 _id) external view override campaignExists(_id) {
+    function getCampaignDonors(uint256 _id) external view campaignExists(_id) {
         Campaign memory campaign = _storage.getCampaign(_id);
-        return (campaign.donorAddresses[], campaign.donationAmounts[]);
+        return (campaign.donorAddresses, campaign.donationAmounts);
     }
 
     /**
-     * @dev Ends a campaign.
+     * @dev Ends a campaign. Sets active in Campaign struct to false.
      * Emits a CampaignEnded event.
      */
-    function endCampaign(uint256 _id) external override nonReentrant whenNotPaused campaignExists(_id) {
+    function endCampaign(uint256 _id) external nonReentrant whenNotPaused campaignExists(_id) {
         Campaign memory campaign = _storage.getCampaign(_id);
 
         require(campaign.owner == msg.sender, "Only the campaign owner can end the campaign");
         require(campaign.active, "Campaign is already ended");
 
-        _storage.endCampaign(_id);
+        _storage.campaign[_id].active = false;
 
         emit CampaignEnded(_id, msg.sender);
     }
@@ -166,7 +166,6 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
         require(campaign.active == false, "Campaign is still active");
         require(campaign.raised >= _amount, "Insufficient funds in the campaign");
 
-        _storage.withdraw(_id, _amount);
         payable(msg.sender).transfer(_amount);
 
         emit Withdrawn(_id, msg.sender, _amount);
