@@ -3,18 +3,18 @@ pragma solidity 0.8.9;
 
 interface IFundIt {
     struct Campaign {
-        uint256 id;
-        address payable owner;
-        string title;
-        string description;
-        uint256 target;
-        uint256 endDate;
-        string image;
-        uint256 totalDonations;
-        address[] donorAddresses;
-        uint256[] donationAmounts;
-        bool active;
-        uint256 amtRaised;
+    uint256 id;
+    address payable owner;
+    string title;
+    string description;
+    uint256 creationDate;
+    uint256 target;
+    string image;
+    uint256 endDate;
+    bool active;
+    address[] donorAddresses;
+    uint256[] donationAmounts;
+    uint256 totalDonations;
     }
 
     function createCampaign(    
@@ -37,6 +37,6 @@ interface IFundIt {
     function withdraw(uint256 _id, uint256 _amount) external;
 
     function pause() external;
-
+    
     function unpause() external;
 }
