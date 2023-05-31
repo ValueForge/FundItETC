@@ -12,25 +12,18 @@ interface IFundIt {
     string image;
     uint256 endDate;
     bool active;
-    address[] donorAddresses;
-    uint256[] donationAmounts;
     uint256 totalDonations;
+    mapping(address => uint256) donations;
+    address[] donorAddresses; // Array to store all donor addresses
     }
-
-    function createCampaign(    
-        address payable _owner,
-        string calldata _title,
-        string calldata _description,
-        uint256 _target,
-        uint256 _duration,
-        string calldata _image
-    ) external;
 
     function getCampaign(uint256 _id) external view returns (Campaign memory);
 
     function donateToCampaign(uint256 _id) external payable;
 
-    function getCampaignDonors(uint256 _id) external view returns (address[] memory, uint256[] memory);
+    function getNumberOfCampaigns() external view returns (uint256);
+
+    function getCampaignDonations(uint256 _campaignId) public view returns (address[] memory, uint256[] memory);
 
     function endCampaign(uint256 _id) external;
 

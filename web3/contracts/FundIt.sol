@@ -79,8 +79,6 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
             endDate: _endDate,
             image: _image,
             active: true,
-            donorAddresses: new address[](0),
-            donationAmounts: new uint256[](0),
             totalDonations: 0
         });
 
@@ -119,7 +117,12 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
         require(campaign.active, "Campaign is not active");
         require(campaign.endDate > block.timestamp, "Campaign has ended");
 
-        _storage.recordDonation(_id, msg.sender, msg.value);
+        function donate(uint256 _campaignId, uint256 _amount) public {
+            Campaign storage campaign = campaigns[_campaignId];
+            campaign.donations[msg.sender] += _amount;
+            campaign.totalDonations += _amount;
+            campaign.donorAddresses.push(msg.sender); // Add the donor's address to the array
+        }
 
         emit DonationMade(_id, msg.sender, msg.value);
     }
@@ -132,9 +135,15 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
     /** @dev Returns the array of donors and an areray of amounts for a specific campaign.
      * @param _id The ID of the campaign to retrieve the donors for.
      */
-    function getCampaignDonors(uint256 _id) external view override campaignExists(_id) returns (address[] memory, uint256[] memory) {
-        Campaign memory campaign = _storage.getCampaign(_id);
-        return (_storage.campaigns(_id).donorAddresses, _storage.campaigns(_id).donationAmounts);
+    function getCampaignDonations(uint256 _campaignId) public view returns (address[] memory, uint256[] memory) {
+        Campaign storage campaign = campaigns[_campaignId];
+        uint256[] memory amounts = new uint256[](campaign.donorAddresses.length);
+
+        for (uint i = 0; i < campaign.donorAddresses.length; i++) {
+            amounts[i] = campaign.donations[campaign.donorAddresses[i]];
+        }
+
+        return (campaign.donorAddresses, amounts);
     }
 
     /**
