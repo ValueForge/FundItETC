@@ -117,14 +117,19 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
         require(campaign.active, "Campaign is not active");
         require(campaign.endDate > block.timestamp, "Campaign has ended");
 
-        function donate(uint256 _campaignId, uint256 _amount) public {
-            Campaign storage campaign = campaigns[_campaignId];
-            campaign.donations[msg.sender] += _amount;
-            campaign.totalDonations += _amount;
-            campaign.donorAddresses.push(msg.sender); // Add the donor's address to the array
-        }
+        donate(_id, msg.value);
 
         emit DonationMade(_id, msg.sender, msg.value);
+    }
+
+    /**
+     * @dev Records a donation to a campaign.
+     */
+    function donate(uint256 _campaignId, uint256 _amount) public internal virtual {
+        Campaign storage campaign = campaigns[_campaignId];
+        campaign.donations[msg.sender] += _amount;
+        campaign.totalDonations += _amount;
+        campaign.donorAddresses.push(msg.sender); // Add the donor's address to the array
     }
 
     /// @dev Fallback function that does not accept Ether.
