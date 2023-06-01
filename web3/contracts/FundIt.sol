@@ -125,7 +125,7 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
     /**
      * @dev Records a donation to a campaign.
      */
-    function donate(uint256 _campaignId, uint256 _amount) public internal virtual {
+    function donate(uint256 _campaignId, uint256 _amount) internal virtual {
         Campaign storage campaign = campaigns[_campaignId];
         campaign.donations[msg.sender] += _amount;
         campaign.totalDonations += _amount;
