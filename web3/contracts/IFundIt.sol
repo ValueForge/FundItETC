@@ -21,7 +21,7 @@ interface IFundIt {
 
     function donateToCampaign(uint256 _id) external payable;
 
-    function donate(uint256 _campaignId, uint256 _amount) public internal virtual;
+    function donate(uint256 _campaignId, uint256 _amount) internal virtual;
 
     function getNumberOfCampaigns() external view returns (uint256);
 
