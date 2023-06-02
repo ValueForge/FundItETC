@@ -126,7 +126,7 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
      * @dev Records a donation to a campaign.
      */
     function donate(uint256 _campaignId, uint256 _amount) public {
-        Campaign storage campaign = campaigns[_campaignId];
+        Campaign storage campaign = _storage.campaigns[_campaignId];
         campaign.donations[msg.sender] += _amount;
         campaign.totalDonations += _amount;
         campaign.donorAddresses.push(msg.sender); // Add the donor's address to the array
@@ -141,7 +141,7 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
      * @param _campaignId The ID of the campaign to retrieve the donors for.
      */
     function getCampaignDonors(uint256 _campaignId) external view override campaignExists(_campaignId) returns (address[] memory, uint256[] memory) {
-        Campaign storage campaign = campaigns[_campaignId];
+        Campaign storage campaign = _storage.campaigns[_campaignId];
         uint256[] memory amounts = new uint256[](campaign.donorAddresses.length);
 
         for (uint i = 0; i < campaign.donorAddresses.length; i++) {
