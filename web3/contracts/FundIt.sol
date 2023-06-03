@@ -135,7 +135,7 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
      * @return The total number of campaigns.
      */
     function getNumberOfCampaigns() external view virtual returns (uint256) {
-        return _storage.NumberOfCampaigns;
+        return _storage.numberOfCampaigns;
     }
 
     /**

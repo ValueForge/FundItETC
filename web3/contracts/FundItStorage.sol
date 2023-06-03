@@ -14,7 +14,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 contract FundItStorage is Initializable, OwnableUpgradeable {
     using SafeMathUpgradeable for uint256;
 
-    // Mapping from campaign ID to Campaign struct, donorAddresses, and donationAmounts
+    // Mapping from campaign ID to Campaign struct
     mapping(uint256 => IFundIt.Campaign) public campaigns;
 
     // Total number of campaigns
@@ -32,22 +32,6 @@ contract FundItStorage is Initializable, OwnableUpgradeable {
         campaigns[numberOfCampaigns] = _campaign;
         numberOfCampaigns++;
     }
-
-    /**
-     * @dev Exrernal function to get a campaign.
-     * @param _campaignId The ID of the campaign to get.
-     */
-    // function getCampaign(uint256 _campaignId) external view returns (IFundIt.Campaign memory) {
-    //    return campaigns[_campaignId];
-    // }
-
-    /**
-     * @dev External function to get the total number of campaigns.
-     * @return The total number of campaigns.
-     */
-    // function getNumberOfCampaigns() external view returns (uint256) {
-    //    return numberOfCampaigns;
-    // }
 
     /**
      * @dev Exrernal function to record a donation.
