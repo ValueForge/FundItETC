@@ -3,7 +3,7 @@ pragma solidity 0.8.9;
 
 interface IFundIt {
     struct Campaign {
-    uint256 id;
+    uint256 campaignId;
     address payable owner;
     string title;
     string description;
@@ -13,23 +13,46 @@ interface IFundIt {
     uint256 endDate;
     bool active;
     uint256 totalDonations;
-    mapping(address => uint256) donations;
+    uint256 numberOfDonations;
     address[] donorAddresses; // Array to store all donor addresses
+    uint256[] donorAmounts; // Array to store all donor amounts
     }
 
-    function getCampaign(uint256 _id) external view returns (Campaign memory);
+    function initialize(address _storageAddress) external;
 
-    function donateToCampaign(uint256 _id) external payable;
+    function createCampaign(
+        address payable _owner,
+        string calldata _title,
+        string calldata _description,
+        uint256 _target,
+        uint256 _duration,
+        string calldata _image
+    ) external;
 
-    function donate(uint256 _campaignId, uint256 _amount) public;
+    function getCampaign(uint256 _id) external view returns (
+        uint256 campaignId,
+        address payable owner,
+        string memory title,
+        string memory description,
+        uint256 creationDate,
+        uint256 target,
+        string memory image,
+        uint256 endDate,
+        bool active,
+        uint256 totalDonations,
+        uint256 numberOfDonations,
+        address[] memory donorAddresses,
+        uint256[] memory donorAmounts);
 
     function getNumberOfCampaigns() external view returns (uint256);
 
-    function getCampaignDonations(uint256 _campaignId) public view returns (address[] memory, uint256[] memory);
+    function donateToCampaign(uint256 _id) external payable;
 
-    function endCampaign(uint256 _id) external;
+    function getCampaignDonors(uint256 _campaignId) external view returns (address[] memory, uint256[] memory);
 
-    function withdraw(uint256 _id, uint256 _amount) external;
+    function endCampaign(uint256 _campaignId) external;
+
+    function withdraw(uint256 _campaignId, uint256 _amount) external;
 
     function pause() external;
     
