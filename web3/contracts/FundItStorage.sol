@@ -3,21 +3,26 @@ pragma solidity 0.8.9;
 
 import "./IFundIt.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+
 
 /**
  * @title FundItStorage
  * @dev This contract stores all the campaigns for the FundIt platform.
  */
-contract FundItStorage {
+contract FundItStorage is Initializable, OwnableUpgradeable {
     using SafeMathUpgradeable for uint256;
 
     // Mapping from campaign ID to Campaign struct, donorAddresses, and donationAmounts
     mapping(uint256 => IFundIt.Campaign) public campaigns;
 
-    // mapping(uint256 => address[]) public donations;
-
     // Total number of campaigns
     uint256 public numberOfCampaigns = 0;
+
+    function initialize() external initializer {
+        __Ownable_init();
+    }
 
     /**
      * @dev External function to add a new campaign.
@@ -57,6 +62,6 @@ contract FundItStorage {
     ) external {
         campaigns[_campaignId].donorAddresses.push(_donor);
         campaigns[_campaignId].donorAmounts.push(_amount);
-        campaigns[_campaignId].totalDonations = campaigns[_campaignId].totalDonations.sum(_amount);
+        campaigns[_campaignId].totalDonations = campaigns[_campaignId].totalDonations.add(_amount);
     }
 }
