@@ -2,12 +2,14 @@
 pragma solidity 0.8.9;
 
 import "./IFundIt.sol";
+import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 
 /**
  * @title FundItStorage
  * @dev This contract stores all the campaigns for the FundIt platform.
  */
 contract FundItStorage {
+    using SafeMathUpgradeable for uint256;
 
     // Mapping from campaign ID to Campaign struct, donorAddresses, and donationAmounts
     mapping(uint256 => IFundIt.Campaign) public campaigns;
@@ -18,7 +20,7 @@ contract FundItStorage {
     uint256 public numberOfCampaigns = 0;
 
     /**
-     * @dev External function to add a new campaign.\
+     * @dev External function to add a new campaign.
      * @param _campaign The Campaign struct to store.
      */
     function addCampaign(IFundIt.Campaign memory _campaign) external {

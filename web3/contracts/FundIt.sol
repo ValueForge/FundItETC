@@ -93,7 +93,6 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
        /**
      * @dev Function to get a specific campaign.
      * @param _campaignId The ID of the campaign to retrieve.
-     * @return A Campaign struct representing the specified campaign.
      */
     function getCampaign(uint256 _campaignId) external view virtual returns (
         uint256 campaignId,
@@ -146,7 +145,7 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
     function donateToCampaign(uint256 _campaignId) external payable nonReentrant whenNotPaused campaignExists(_campaignId) {
         require(msg.value > 0, "Donation amount must be greater than 0");
 
-        Campaign storage campaign = this.getCampaign(_campaignId);
+        Campaign memory campaign = this.getCampaign(_campaignId);
 
         require(campaign.active, "Campaign is not active");
         require(campaign.endDate > block.timestamp, "Campaign has ended");
