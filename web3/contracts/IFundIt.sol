@@ -48,11 +48,11 @@ interface IFundIt {
 
     function donateToCampaign(uint256 _id) external payable;
 
-    function getCampaignDonors(uint256 _campaignId) external view returns (address[] memory, uint256[] memory);
+    function getCampaignDonors(uint256 _id) external view returns (address[] memory, uint256[] memory);
 
-    function endCampaign(uint256 _campaignId) external;
+    function endCampaign(uint256 _id) external;
 
-    function withdraw(uint256 _campaignId, uint256 _amount) external;
+    function withdraw(uint256 _id, uint256 _amount) external;
 
     function pause() external;
     
