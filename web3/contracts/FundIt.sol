@@ -111,7 +111,7 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
 
         require(_id <this.getNumberOfCampaigns(), "Campaign does not exist");  
         
-        Campaign storage campaign = _storage.campaigns[_id];
+        Campaign storage campaign = _storage.campaigns(_id);
         
         return (
             campaign.campaignId,
