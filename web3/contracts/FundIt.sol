@@ -87,7 +87,7 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
 
        _storage.addCampaign(newCampaign);
 
-       emit CampaignCreated(_storage.getNumberOfCampaigns() - 1, _owner);
+       emit CampaignCreated(this.getNumberOfCampaigns() - 1, _owner);
     }
 
        /**
@@ -109,7 +109,7 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
         address[] memory donorAddresses,
         uint256[] memory donorAmounts) {
 
-        require(_id < _storage.getNumberOfCampaigns(), "Campaign does not exist");  
+        require(_id <this.getNumberOfCampaigns(), "Campaign does not exist");  
         
         Campaign storage campaign = _storage.campaigns[_id];
         
@@ -135,7 +135,7 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
      * @return The total number of campaigns.
      */
     function getNumberOfCampaigns() external view virtual returns (uint256) {
-        return _storage.getNumberOfCampaigns();
+        return _storage.NumberOfCampaigns;
     }
 
     /**
