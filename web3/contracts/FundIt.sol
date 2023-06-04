@@ -114,7 +114,7 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
         
         campaign = _storage.campaigns(_id);
 
-        uint256 _campaignId = campaign.campaignId;
+        _campaignId = campaign.campaignId;
         address payable _owner = campaign.owner;
         string memory _title = campaign.title;
         string memory _description = campaign.description;

@@ -43,7 +43,7 @@ interface IFundIt {
         uint256 numberOfDonations,
         address[] memory donorAddresses,
         uint256[] memory donorAmounts,
-        Campaign campaign);
+        Campaign memory campaign);
 
     function getNumberOfCampaigns() external view returns (uint256);
 
