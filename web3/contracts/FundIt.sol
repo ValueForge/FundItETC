@@ -108,11 +108,11 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
         uint256 numberOfDonations,
         address[] memory donorAddresses,
         uint256[] memory donorAmounts,
-        struct campaign) {
+        Campaign memory campaign) {
 
         require(_id <this.getNumberOfCampaigns(), "Campaign does not exist");  
         
-        Campaign memory campaign = _storage.campaigns(_id);
+        campaign = _storage.campaigns(_id);
 
         uint256 _campaignId = campaign.campaignId;
         address payable _owner = campaign.owner;
