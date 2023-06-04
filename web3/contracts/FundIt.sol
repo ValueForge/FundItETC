@@ -111,23 +111,23 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
 
         require(_id <this.getNumberOfCampaigns(), "Campaign does not exist");  
         
-        Campaign storage campaign = _storage.campaigns(_id);
-        
-        return (
-            campaign.campaignId,
-            campaign.owner,
-            campaign.title,
-            campaign.description,
-            campaign.creationDate,
-            campaign.target,
-            campaign.image,
-            campaign.endDate,
-            campaign.active,
-            campaign.totalDonations,
-            campaign.numberOfDonations,
-            campaign.donorAddresses,
-            campaign.donorAmounts
-        );
+        Campaign memory campaign = _storage.campaigns(_id);
+
+        _campaignId = campaign.campaignId;
+        _owner = campaign.owner;
+        _title = campaign.title;
+        _description = campaign.description;
+        _creationDate = campaign.creationDate;
+        _target = campaign.target;
+        _image = campaign.image;
+        _endDate = campaign.endDate;
+        _active = campaign.active;
+        _totalDonations = campaign.totalDonations;
+        _numberOfDonations = campaign.numberOfDonations;
+        _donorAddresses[] = campaign.donorAddresses;
+        _donorAmounts[] = campaign.donorAmounts;
+
+        return (_campaignId, _owner, _title, _description, _creationDate, _target, _image, _endDate, _active, _totalDonations, _numberOfDonations, _donorAddresses[], _donorAmounts[]);
     }  
 
     /**
