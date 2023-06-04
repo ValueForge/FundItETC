@@ -107,27 +107,28 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
         uint256 totalDonations,
         uint256 numberOfDonations,
         address[] memory donorAddresses,
-        uint256[] memory donorAmounts) {
+        uint256[] memory donorAmounts,
+        struct campaign) {
 
         require(_id <this.getNumberOfCampaigns(), "Campaign does not exist");  
         
         Campaign memory campaign = _storage.campaigns(_id);
 
-        _campaignId = campaign.campaignId;
-        _owner = campaign.owner;
-        _title = campaign.title;
-        _description = campaign.description;
-        _creationDate = campaign.creationDate;
-        _target = campaign.target;
-        _image = campaign.image;
-        _endDate = campaign.endDate;
-        _active = campaign.active;
-        _totalDonations = campaign.totalDonations;
-        _numberOfDonations = campaign.numberOfDonations;
-        _donorAddresses[] = campaign.donorAddresses;
-        _donorAmounts[] = campaign.donorAmounts;
+        uint256 _campaignId = campaign.campaignId;
+        address payable _owner = campaign.owner;
+        string memory _title = campaign.title;
+        string memory _description = campaign.description;
+        uint256 _creationDate = campaign.creationDate;
+        uint256 _target = campaign.target;
+        string memory _image = campaign.image;
+        uint256 _endDate = campaign.endDate;
+        bool _active = campaign.active;
+        uint256 _totalDonations = campaign.totalDonations;
+        uint256 _numberOfDonations = campaign.numberOfDonations;
+        address[] memory _donorAddresses = campaign.donorAddresses;
+        uint256[] memory _donorAmounts = campaign.donorAmounts;
 
-        return (_campaignId, _owner, _title, _description, _creationDate, _target, _image, _endDate, _active, _totalDonations, _numberOfDonations, _donorAddresses[], _donorAmounts[]);
+        return (_campaignId, _owner, _title, _description, _creationDate, _target, _image, _endDate, _active, _totalDonations, _numberOfDonations, _donorAddresses[], _donorAmounts[], campaign);
     }  
 
     /**
@@ -150,9 +151,6 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
         require(campaign.active, "Campaign is not active");
         require(campaign.endDate > block.timestamp, "Campaign has ended");
 
-        // campaign.donorAddresses.push(msg.sender);
-        // campaign.donorAmounts.push(msg.value);
-        // campaign.totalDonations = campaign.totalDonations.add(msg.value);
         _storage.recordDonation(_id, msg.sender, msg.value);
 
         emit DonationMade(_id, msg.sender, msg.value);
