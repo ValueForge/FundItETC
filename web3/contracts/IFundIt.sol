@@ -32,7 +32,7 @@ interface IFundIt {
 
     function getCampaign(uint256 _id) external returns (Campaign memory);
 
-    function deconstructCampaign(Campaign memory) external returns (uint256, address, string memory, string memory, uint256, uint256, string memory, uint256, bool, uint256, uint256, uint256, address[] memory, uint256[] memory);
+    function deconstructCampaign(Campaign memory) external view returns (uint256, address, string memory, string memory, uint256, uint256, string memory, uint256, bool, uint256, uint256, uint256, address[] memory, uint256[] memory);
 
     function getNumberOfCampaigns() external view returns (uint256);
 
