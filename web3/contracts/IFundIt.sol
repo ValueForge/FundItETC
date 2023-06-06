@@ -4,15 +4,15 @@ pragma solidity 0.8.9;
 interface IFundIt {
     struct Campaign {
     uint256 campaignId;
-    address payable owner;
+    address payable campaignOwner;
     string title;
     string description;
     uint256 creationDate;
     uint256 target;
-    string image;
+    string imageURL;
     uint256 endDate;
     bool active;
-    uint256 totalDonations;
+    uint256 amountRaised;
     uint256 numberOfDonations;
     address[] donorAddresses; // Array to store all donor addresses
     uint256[] donorAmounts; // Array to store all donor amounts
@@ -21,29 +21,17 @@ interface IFundIt {
     function initialize(address _storageAddress) external;
 
     function createCampaign(
-        address payable _owner,
+        address payable _campaignOwner,
         string calldata _title,
         string calldata _description,
         uint256 _target,
         uint256 _duration,
-        string calldata _image
+        string calldata _imageURL
     ) external;
 
-    function getCampaign(uint256 _id) external view returns (
-        uint256 campaignId,
-        address payable owner,
-        string memory title,
-        string memory description,
-        uint256 creationDate,
-        uint256 target,
-        string memory image,
-        uint256 endDate,
-        bool active,
-        uint256 totalDonations,
-        uint256 numberOfDonations,
-        address[] memory donorAddresses,
-        uint256[] memory donorAmounts,
-        Campaign memory campaign);
+    function getCampaign(uint256 _id) external returns (Campaign memory);
+
+    function deconstructCampaign(Campaign memory) external returns (uint256, address, string memory, string memory, uint256, uint256, string memory, uint256, bool, uint256, uint256, address[] memory, uint256[] memory);
 
     function getNumberOfCampaigns() external view returns (uint256);
 

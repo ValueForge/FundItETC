@@ -52,12 +52,12 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
      * Emits a CampaignCreated event.
      */
     function createCampaign(
-        address payable _owner,
+        address payable _campaignOwner,
         string calldata _title,
         string calldata _description,
         uint256 _target,
         uint256 _duration,
-        string calldata _image
+        string calldata _imageURL
     ) external nonReentrant whenNotPaused {
         require(bytes(_title).length > 0, "Title is required");
         require(bytes(_description).length > 0, "Description is required");
@@ -71,64 +71,53 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
         // Create the campaign struct
        IFundIt.Campaign memory newCampaign = IFundIt.Campaign({
             campaignId: _campaignId,
-            owner: _owner,
+            owner: _campaignOwner,
             title: _title,
             description: _description,
             creationDate: block.timestamp,
             target: _target,
             endDate: _endDate,
-            image: _image,
+            imageURL: _imageURL,
             active: true,
-            totalDonations: 0,
-            numberOfDonations: 0,
+            amountRaised: 0,
+            donorCount: 0,
             donorAddresses: new address[](0),
             donorAmounts: new uint256[](0)
         });
 
        _storage.addCampaign(newCampaign);
 
-       emit CampaignCreated(this.getNumberOfCampaigns() - 1, _owner);
+       emit CampaignCreated(this.getNumberOfCampaigns() - 1, _campaignOwner);
     }
 
-       /**
+    /**
      * @dev Function to get a specific campaign.
      * @param _id The ID of the campaign to retrieve.
      */
-    function getCampaign(uint256 _id) external view virtual returns (
-        uint256 campaignId,
-        address payable owner,
-        string memory title,
-        string memory description,
-        uint256 creationDate,
-        uint256 target,
-        string memory image,
-        uint256 endDate,
-        bool active,
-        uint256 totalDonations,
-        uint256 numberOfDonations,
-        address[] memory donorAddresses,
-        uint256[] memory donorAmounts,
-        Campaign memory campaign) {
+    function getCampaign(uint256 _id) external virtual campaignExists(_id) returns (Campaign storage) { 
+        _campaign =  _storage.campaignGetter(_id);
+    }
 
-        require(_id <this.getNumberOfCampaigns(), "Campaign does not exist");  
-        
-        campaign = _storage.campaigns(_id);
-
-        _campaignId = campaign.campaignId;
-        address payable _owner = campaign.owner;
-        string memory _title = campaign.title;
-        string memory _description = campaign.description;
-        uint256 _creationDate = campaign.creationDate;
-        uint256 _target = campaign.target;
-        string memory _image = campaign.image;
-        uint256 _endDate = campaign.endDate;
-        bool _active = campaign.active;
-        uint256 _totalDonations = campaign.totalDonations;
-        uint256 _numberOfDonations = campaign.numberOfDonations;
-        address[] memory _donorAddresses = campaign.donorAddresses;
-        uint256[] memory _donorAmounts = campaign.donorAmounts;
-
-        return (_campaignId, _owner, _title, _description, _creationDate, _target, _image, _endDate, _active, _totalDonations, _numberOfDonations, _donorAddresses[], _donorAmounts[], campaign);
+    /**
+     * @dev Function to deconstruct a campaign struct.
+     * @param _campaign The Campaign struct to deconstruct.
+     * @return The deconstructed Campaign struct.
+     */
+    function deconstructCampaign(Campaign memory _campaign) {
+        _campaignId = _campaign.campaignId;
+        address payable _campaignOwner = _campaign.owner;
+        string memory _title = _campaign.title;
+        string memory _description = _campaign.description;
+        uint256 _creationDate = _campaign.creationDate;
+        uint256 _target = _campaign.target;
+        string memory _imageURL = _campaign.imageURL;
+        uint256 _endDate = _campaign.endDate;
+        bool _active = _campaign.active;
+        uint256 _amountRaised = _campaign.amountRaised;
+        uint256 _donorCount = _campaign.donorCount;
+        address[] memory _donorAddresses = _campaign.donorAddresses;
+        uint256[] memory _donorAmounts = _campaign.donorAmounts;
+        return (_campaignId, _campaignOwner, _title, _description, _creationDate, _target, _imageURL, _endDate, _active, _amountRaised, _donorCount, _donorAddresses[], _donorAmounts[], campaign);
     }  
 
     /**
@@ -161,20 +150,6 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
         revert("FundIt does not accept direct payments");
     }
 
-    /** @dev Returns the array of donors and an areray of amounts for a specific campaign.
-     * @param _id The ID of the campaign to retrieve the donors for.
-     */
-    function getCampaignDonors(uint256 _id) external view campaignExists(_id) returns (address[] memory, uint256[] memory) {
-        Campaign storage campaign = _storage.campaigns[_id];
-        uint256[] memory amounts = new uint256[](campaign.donorAddresses.length);
-
-        for (uint i = 0; i < campaign.donorAddresses.length; i++) {
-            amounts[i] = campaign.donations[campaign.donorAddresses[i]];
-        }
-
-        return (campaign.donorAddresses, amounts);
-    }
-
     /**
      * @dev Allows a campaign owner to end a campaign early. Sets active in Campaign struct to false.
      * Emits a CampaignEnded event.
@@ -182,7 +157,7 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
     function endCampaign(uint256 _id) external nonReentrant whenNotPaused campaignExists(_id) {
         Campaign memory campaign = _storage.getCampaign(_id);
 
-        require(campaign.owner == msg.sender, "Only the campaign owner can end the campaign");
+        require(campaign.campaignOwner == msg.sender, "Only the campaign owner can end the campaign manually");
         require(campaign.active, "Campaign is already ended");
 
         _storage.campaigns[_id].active = false;
@@ -201,7 +176,7 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
 
         require(campaign.owner == msg.sender, "Only the campaign owner can withdraw funds");
         require(campaign.active == false, "Campaign is still active");
-        require(campaign.totalDonations >= _amount, "Insufficient funds in the campaign");
+        require(campaign.amountRaised >= _amount, "Insufficient funds in the campaign");
 
         payable(msg.sender).transfer(_amount);
 
