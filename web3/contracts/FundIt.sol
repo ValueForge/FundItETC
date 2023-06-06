@@ -106,7 +106,7 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
      * @param _campaign The Campaign struct to deconstruct.
      * @return The deconstructed Campaign struct.
      */
-    function deconstructCampaign(Campaign memory _campaign) external public returns (uint256, address, string memory, string memory, uint256, uint256, string memory, uint256, bool, uint256, uint256, address[] memory, uint256[] memory){
+    function deconstructCampaign(Campaign memory _campaign) external returns (uint256, address, string memory, string memory, uint256, uint256, string memory, uint256, bool, uint256, uint256, address[] memory, uint256[] memory){
         _campaignId = _campaign.campaignId;
         address payable _campaignOwner = _campaign.owner;
         string memory _title = _campaign.title;
@@ -164,7 +164,7 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
      * @dev Allows a campaign owner to end a campaign early. Sets active in Campaign struct to false.
      * Emits a CampaignEnded event.
      */
-    function endCampaign(uint256 _id) external public nonReentrant whenNotPaused campaignExists(_id) {
+    function endCampaign(uint256 _id) external nonReentrant whenNotPaused campaignExists(_id) {
         Campaign memory campaign = _storage.getCampaign(_id);
 
         require(campaign.campaignOwner == msg.sender, "Only the campaign owner can end the campaign manually");
