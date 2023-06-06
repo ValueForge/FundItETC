@@ -34,6 +34,14 @@ contract FundItStorage is Initializable, OwnableUpgradeable {
     }
 
     /**
+     * External function to update a campaign.
+     * @param _campaignId The ID of the campaign to update.
+     */
+    function updateCampaign(uint256 _campaignId, IFundIt.Campaign memory _updatedCampaign) external {
+        campaigns[_campaignId] = _updatedCampaign;
+    }
+
+    /**
      * External function to get a campaign struct.
      * @param _campaignId The ID of the campaign to get.
      */
@@ -47,7 +55,7 @@ contract FundItStorage is Initializable, OwnableUpgradeable {
      * @param _donor The address of the donor.
      * @param _amount The amount of the donation.
      */
-    function recordDonation(uint256 _campaignId, address _donor, uint256 _amount) external {
+    function recordDonation(uint256 _campaignId, address _donor, uint256 _amount) external private {
         campaigns[_campaignId].donorAddresses.push(_donor);
         campaigns[_campaignId].donorAmounts.push(_amount);
         campaigns[_campaignId].amountRaised = campaigns[_campaignId].amountRaised.add(_amount);
