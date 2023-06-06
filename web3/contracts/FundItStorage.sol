@@ -55,7 +55,7 @@ contract FundItStorage is Initializable, OwnableUpgradeable {
      * @param _donor The address of the donor.
      * @param _amount The amount of the donation.
      */
-    function recordDonation(uint256 _campaignId, address _donor, uint256 _amount) external private {
+    function recordDonation(uint256 _campaignId, address _donor, uint256 _amount) external {
         campaigns[_campaignId].donorAddresses.push(_donor);
         campaigns[_campaignId].donorAmounts.push(_amount);
         campaigns[_campaignId].amountRaised = campaigns[_campaignId].amountRaised.add(_amount);

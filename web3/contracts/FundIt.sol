@@ -26,6 +26,8 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
 
     event CampaignCreated(uint256 indexed campaignId, address indexed owner);
 
+    event TargetReached(uint256 indexed campaignId, address indexed donor, uint256 amount);
+
     event DonationMade(uint256 indexed campaignId, address indexed donor, uint256 amount);
 
     event CampaignEnded(uint256 indexed campaignId, address indexed owner);
@@ -55,13 +57,13 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
         address payable _campaignOwner,
         string calldata _title,
         string calldata _description,
-        uint256 _target,
+        uint256 _targetFunding,
         uint256 _duration,
         string calldata _imageURL
     ) external nonReentrant whenNotPaused {
         require(bytes(_title).length > 0, "Title is required");
         require(bytes(_description).length > 0, "Description is required");
-        require(_target > 0, "Target amount must be greater than 0");
+        require(_targetFunding > 0, "Target amount must be greater than 0");
         require(_duration > 0, "Campaign duration must be greater than 0");
         require(_duration.mul(24 * 60 * 60) <= maxDuration, "Campaign duration exceeds maximum limit");
 
@@ -75,11 +77,12 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
             title: _title,
             description: _description,
             creationDate: block.timestamp,
-            target: _target,
+            targetFunding: _targetFunding,
             endDate: _endDate,
             imageURL: _imageURL,
             active: true,
             amountRaised: 0,
+            amountWithdrawn: 0,
             donorCount: 0,
             donorAddresses: new address[](0),
             donorAmounts: new uint256[](0)
@@ -109,15 +112,16 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
         string memory _title = _campaign.title;
         string memory _description = _campaign.description;
         uint256 _creationDate = _campaign.creationDate;
-        uint256 _target = _campaign.target;
+        uint256 _targetFunding = _campaign.targetFunding;
         string memory _imageURL = _campaign.imageURL;
         uint256 _endDate = _campaign.endDate;
         bool _active = _campaign.active;
         uint256 _amountRaised = _campaign.amountRaised;
+        uint256 _amountWithdrawn = _campaign.amountWithdrawn;
         uint256 _donorCount = _campaign.donorCount;
         address[] memory _donorAddresses = _campaign.donorAddresses;
         uint256[] memory _donorAmounts = _campaign.donorAmounts;
-        return (_campaignId, _campaignOwner, _title, _description, _creationDate, _target, _imageURL, _endDate, _active, _amountRaised, _donorCount, _donorAddresses[], _donorAmounts[], campaign);
+        return (_campaignId, _campaignOwner, _title, _description, _creationDate, _targetFunding, _imageURL, _endDate, _active, _amountRaised, _amountWithdrawn, _donorCount, _donorAddresses[], _donorAmounts[], campaign);
     }  
 
     /**
@@ -139,6 +143,12 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
 
         require(campaign.active, "Campaign is not active");
         require(campaign.endDate > block.timestamp, "Campaign has ended");
+
+        if (campaign.amountRaised.add(msg.value) >= campaign.targetFunding) {
+            console.log("Campaign has reached target funding");
+            campaign.active = false;
+            emit TargetReached(_id, msg.sender, msg.value);
+        }
 
         _storage.recordDonation(_id, msg.sender, msg.value);
 
@@ -177,9 +187,11 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
 
         require(campaign.owner == msg.sender, "Only the campaign owner can withdraw funds");
         require(campaign.active == false, "Campaign is still active");
-        require(campaign.amountRaised >= _amount, "Insufficient funds in the campaign");
+        require(campaign.amountRaised.sub(campaign.amountWithdrawn) >= _amount, "Insufficient funds in the campaign");
 
         payable(msg.sender).transfer(_amount);
+        campaign.amountWithdrawn = campaign.amountWithdrawn.add(_amount);
+        _storage.updateCampaign(_id, campaign);
 
         emit Withdrawn(_id, msg.sender, _amount);
     }
