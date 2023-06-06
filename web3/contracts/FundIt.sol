@@ -14,6 +14,7 @@ import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
  * @title FundIt Contract
  * @dev This contract enables users to create, manage, and donate to crowdfunding campaigns.
  * It uses a separate storage contract for storing the state of campaigns.
+ * The contract is pausable and upgradable. 
  */
 contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeable, ReentrancyGuardUpgradeable {
     using SafeMathUpgradeable for uint256;
@@ -24,15 +25,15 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
 
     FundItStorage private _storage;
 
-    event CampaignCreated(uint256 indexed campaignId, address indexed owner);
+    event CampaignCreated(uint256 indexed campaignId, address indexed campaignOwner);
 
-    event TargetReached(uint256 indexed campaignId, address indexed donor, uint256 amount);
+    event TargetReached(uint256 indexed campaignId, address indexed msg.sender, uint256 msg.value);
 
-    event DonationMade(uint256 indexed campaignId, address indexed donor, uint256 amount);
+    event DonationMade(uint256 indexed campaignId, address indexed msg.sender, uint256 msg.value);
 
-    event CampaignEnded(uint256 indexed campaignId, address indexed owner);
+    event CampaignEnded(uint256 indexed campaignId, address indexed campaignOwner);
 
-    event Withdrawn(uint256 indexed campaignId, address indexed owner, uint256 amount);
+    event Withdrawn(uint256 indexed campaignId, address indexed campaignOwner, uint256 msg.value);
 
     /// @dev Modifier to check if a campaign exists.
     modifier campaignExists(uint256 _id) {
@@ -54,7 +55,6 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
      * Emits a CampaignCreated event.
      */
     function createCampaign(
-        address payable _campaignOwner,
         string calldata _title,
         string calldata _description,
         uint256 _targetFunding,
@@ -63,17 +63,18 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
     ) external nonReentrant whenNotPaused {
         require(bytes(_title).length > 0, "Title is required");
         require(bytes(_description).length > 0, "Description is required");
-        require(_targetFunding > 0, "Target amount must be greater than 0");
+        require(_targetFunding > 0, "Target must be greater than 0");
         require(_duration > 0, "Campaign duration must be greater than 0");
         require(_duration.mul(24 * 60 * 60) <= maxDuration, "Campaign duration exceeds maximum limit");
 
         _campaignId = this.getNumberOfCampaigns();
+        address payable _campaignOwner = payable(msg.sender);
         uint256 _endDate = block.timestamp.add(_duration.mul(24 * 60 * 60));
 
         // Create the campaign struct
        IFundIt.Campaign memory newCampaign = IFundIt.Campaign({
             campaignId: _campaignId,
-            owner: _campaignOwner,
+            campaignOwner: _campaignOwner,
             title: _title,
             description: _description,
             creationDate: block.timestamp,
@@ -109,21 +110,22 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
      * @param _campaign The Campaign struct to deconstruct.
      * @return The deconstructed Campaign struct.
      */
-    function deconstructCampaign(Campaign memory _campaign) external returns (uint256, address, string memory, string memory, uint256, uint256, string memory, uint256, bool, uint256, uint256, address[] memory, uint256[] memory){
-        _campaignId = _campaign.campaignId;
-        address payable _campaignOwner = _campaign.owner;
-        string memory _title = _campaign.title;
-        string memory _description = _campaign.description;
-        uint256 _creationDate = _campaign.creationDate;
-        uint256 _targetFunding = _campaign.targetFunding;
-        string memory _imageURL = _campaign.imageURL;
-        uint256 _endDate = _campaign.endDate;
-        bool _active = _campaign.active;
-        uint256 _amountRaised = _campaign.amountRaised;
-        uint256 _amountWithdrawn = _campaign.amountWithdrawn;
-        uint256 _donorCount = _campaign.donorCount;
-        address[] memory _donorAddresses = _campaign.donorAddresses;
-        uint256[] memory _donorAmounts = _campaign.donorAmounts;
+    function deconstructCampaign(Campaign memory campaign) external returns (uint256, address, string memory, string memory, uint256, uint256, string memory, uint256, bool, uint256, uint256, address[] memory, uint256[] memory){
+        _campaignId = campaign.campaignId;
+        address payable _campaignOwner = campaign.campaignOwner;
+        string memory _title = campaign.title;
+        string memory _description = campaign.description;
+        uint256 _creationDate = campaign.creationDate;
+        uint256 _targetFunding = campaign.targetFunding;
+        string memory _imageURL = campaign.imageURL;
+        uint256 _endDate = campaign.endDate;
+        bool _active = campaign.active;
+        uint256 _amountRaised = campaign.amountRaised;
+        uint256 _amountWithdrawn = campaign.amountWithdrawn;
+        uint256 _donorCount = campaign.donorCount;
+        address[] memory _donorAddresses = campaign.donorAddresses;
+        uint256[] memory _donorAmounts = campaign.donorAmounts;
+        
         return (_campaignId, _campaignOwner, _title, _description, _creationDate, _targetFunding, _imageURL, _endDate, _active, _amountRaised, _amountWithdrawn, _donorCount, _donorAddresses[], _donorAmounts[]);
     }  
 
@@ -138,12 +140,12 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
     /**
      * @dev Allows a user to donate to a campaign.
      * Requires that the campaign is active and has not ended.
-     * If the donation amount is greater than or equal to the target funding, the campaign is ended.
+     * If the donation msg.value is greater than or equal to the target funding, the campaign is ended.
      * Emits a TargetReached event if the target funding is reached.
      * Emits a DonationMade event.
      */
     function donateToCampaign(uint256 _id) external payable nonReentrant whenNotPaused campaignExists(_id) {
-        require(msg.value > 0, "Donation amount must be greater than 0");
+        require(msg.value > 0, "Donation msg.value must be greater than 0");
 
         Campaign memory campaign = this.getCampaign(_id);
 
@@ -166,14 +168,14 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
     }
 
     /**
-     * @dev Allows a campaign owner to end a campaign early. Sets active in Campaign struct to false.
+     * @dev Allows a campaign campaignOwner to end a campaign early. Sets active in Campaign struct to false.
      * Requires that the campaign is active.
      * Emits a CampaignEnded event.
      */
     function endCampaign(uint256 _id) external nonReentrant whenNotPaused campaignExists(_id) {
         Campaign memory campaign = _storage.getCampaign(_id);
 
-        require(campaign.campaignOwner == msg.sender, "Only the campaign owner can end the campaign manually");
+        require(campaign.campaignOwner == msg.sender, "Only the campaign campaignOwner can end the campaign manually");
         require(campaign.active, "Campaign is already ended");
 
         campaign.active = false;
@@ -183,20 +185,20 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
     }
 
     /**
-     * @dev Allows the campaign owner to withdraw funds from the campaign.
+     * @dev Allows the campaign campaignOwner to withdraw funds from the campaign.
      * @param _id The ID of the campaign to withdraw funds from.
-     * @param _amount The amount of funds to withdraw.
+     * @param _amount The msg.value of funds to withdraw.
      * Requires that the campaign is not active.
-     * Requires that the campaign owner is the message sender.
-     * Requires that the amount to withdraw is less than or equal to the amount raised minus the amount previously withdrawn.
+     * Requires that the campaign campaignOwner is the message sender.
+     * Requires that the msg.value to withdraw is less than or equal to the msg.value raised minus the msg.value previously withdrawn.
      * Emits a Withdrawn event.
      */
     function withdraw(uint256 _id, uint256 _amount) external nonReentrant whenNotPaused campaignExists(_id) {
-        require(_amount > 0, "Withdrawal amount must be greater than 0");
+        require(_amount > 0, "Withdrawal msg.value must be greater than 0");
 
         Campaign memory campaign = _storage.getCampaign(_id);
 
-        require(campaign.owner == msg.sender, "Only the campaign owner can withdraw funds");
+        require(campaign.campaignOwner == msg.sender, "Only the campaign campaignOwner can withdraw funds");
         require(campaign.active == false, "Campaign is still active");
         require(campaign.amountRaised.sub(campaign.amountWithdrawn) >= _amount, "Insufficient funds in the campaign");
 
