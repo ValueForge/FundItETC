@@ -45,7 +45,7 @@ contract FundItStorage is Initializable, OwnableUpgradeable {
      * External function to get a campaign struct.
      * @param _campaignId The ID of the campaign to get.
      */
-    function campaignGetter(uint256 _campaignId) external view returns (IFundIt.Campaign storage) {
+    function campaignGetter(uint256 _campaignId) external view returns (IFundIt.Campaign memory) {
         return campaigns[_campaignId];
     }
 
