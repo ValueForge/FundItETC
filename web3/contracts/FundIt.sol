@@ -27,13 +27,13 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
 
     event CampaignCreated(uint256 indexed campaignId, address indexed campaignOwner);
 
-    event TargetReached(uint256 indexed campaignId, address indexed msg.sender, uint256 msg.value);
+    event TargetReached(uint256 indexed campaignId, address indexed msgSender, uint256 msgValue);
 
-    event DonationMade(uint256 indexed campaignId, address indexed msg.sender, uint256 msg.value);
+    event DonationMade(uint256 indexed campaignId, address indexed msgSender, uint256 msgValue);
 
     event CampaignEnded(uint256 indexed campaignId, address indexed campaignOwner);
 
-    event Withdrawn(uint256 indexed campaignId, address indexed campaignOwner, uint256 msg.value);
+    event Withdrawn(uint256 indexed campaignId, address indexed campaignOwner, uint256 msgValue);
 
     /// @dev Modifier to check if a campaign exists.
     modifier campaignExists(uint256 _id) {
@@ -91,7 +91,7 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
 
        _storage.addCampaign(newCampaign);
 
-       emit CampaignCreated("A campaign numbered ", this.getNumberOfCampaigns() - 1, " has been created by ", _campaignOwner, ".");
+       emit CampaignCreated(_campaignId, _campaignOwner);
     }
 
     /**
@@ -152,14 +152,17 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
         require(campaign.active, "Campaign is not active");
         require(campaign.endDate > block.timestamp, "Campaign has ended");
 
+        address payable msgSender = payable(msg.sender);
+        uint256 msgValue = msg.value;
+
         if (campaign.amountRaised.add(msg.value) >= campaign.targetFunding) {
             campaign.active = false;
-            emit TargetReached("Campaign number ", _id, " reached its funding target when ", msg.sender, " donated ", msg.value, " ETC.");
+            emit TargetReached(_id, msgSender, msgValue);
         }
 
         _storage.recordDonation(_id, msg.sender, msg.value);
 
-        emit DonationMade("Campaign number ", _id, " has received a donation from ", msg.sender, "of ", msg.value, "ETC.");
+        emit DonationMade(_id, msgSender, msgValue);
     }
 
     /// @dev Fallback function that does not accept Ether.
@@ -181,7 +184,9 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
         campaign.active = false;
         _storage.updateCampaign(_id, campaign);
 
-        emit CampaignEnded("Campaign number ", _id, "has been ended by ", msg.sender, ".");
+        address payable msgSender = payable(msg.sender);
+
+        emit CampaignEnded(_id, msgSender);
     }
 
     /**
@@ -206,7 +211,7 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
         campaign.amountWithdrawn = campaign.amountWithdrawn.add(_amount);
         _storage.updateCampaign(_id, campaign);
 
-        emit Withdrawn("Campaign number ", _id, ", owned by ", msg.sender, " has withdrawn ", _amount, " ETC.");
+        emit Withdrawn(_id, campaign.campaignOwner, _amount);
     }
 
     /// @dev Pauses the contract, preventing any actions.
