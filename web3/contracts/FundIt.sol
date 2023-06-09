@@ -72,7 +72,7 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
         uint256 _endDate = block.timestamp.add(_duration.mul(24 * 60 * 60));
 
         // Create the campaign struct
-       IFundIt.Campaign memory newCampaign = IFundIt.Campaign({
+        IFundIt.Campaign memory newCampaign = IFundIt.Campaign({
             campaignId: _campaignId,
             campaignOwner: _campaignOwner,
             title: _title,
@@ -89,9 +89,9 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
             donorAmounts: new uint256[](0)
         });
 
-       _storage.addCampaign(newCampaign);
+        _storage.addCampaign(newCampaign);
 
-       emit CampaignCreated(_campaignId, _campaignOwner);
+        emit CampaignCreated(_campaignId, _campaignOwner);
     }
 
     /**
@@ -107,10 +107,10 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
 
     /**
      * @dev Function to deconstruct a campaign struct.
-     * @param _campaign The Campaign struct to deconstruct.
+     * @param campaign The Campaign struct to deconstruct.
      * @return The deconstructed Campaign struct.
      */
-    function deconstructCampaign(Campaign memory campaign) external returns (uint256, address, string memory, string memory, uint256, uint256, string memory, uint256, bool, uint256, uint256, address[] memory, uint256[] memory){
+    function deconstructCampaign(Campaign memory campaign) external returns (uint256, address, string memory, string memory, uint256, uint256, string memory, uint256, bool, uint256, uint256, uint256, address[] memory, uint256[] memory){
         _campaignId = campaign.campaignId;
         address payable _campaignOwner = campaign.campaignOwner;
         string memory _title = campaign.title;
@@ -134,7 +134,7 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
      * @return The total number of campaigns.
      */
     function getNumberOfCampaigns() external view virtual returns (uint256) {
-        return _storage.numberOfCampaigns;
+        return uint256 _storage.numberOfCampaigns;
     }
 
     /**
@@ -176,7 +176,7 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
      * Emits a CampaignEnded event.
      */
     function endCampaign(uint256 _id) external nonReentrant whenNotPaused campaignExists(_id) {
-        Campaign memory campaign = _storage.getCampaign(_id);
+        Campaign memory campaign = _storage.campaignGetter(_id);
 
         require(campaign.campaignOwner == msg.sender, "Only the campaign campaignOwner can end the campaign manually");
         require(campaign.active, "Campaign is already ended");
