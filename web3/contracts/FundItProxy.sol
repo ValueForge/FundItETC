@@ -10,6 +10,6 @@ contract FundItProxy is TransparentUpgradeableProxy {
         address _logic,
         address _admin,
         address _storage
-    ) TransparentUpgradeableProxy(_logic, _admin, _storage) {
+    ) TransparentUpgradeableProxy(_logic, _admin, abi.encodePacked(_storage)) {
     }
 }

@@ -24,7 +24,7 @@ contract FundItDeployer is OwnableUpgradeable {
         proxy = new TransparentUpgradeableProxy(
             address(fundIt),
             address(proxyAdmin),
-            address(_storage)  // This parameter can be used to initialize the FundIt contract, if needed
+            abi.encodePacked(_storage)  // This parameter can be used to initialize the FundIt contract, if needed
         );
     }
 }
