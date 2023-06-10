@@ -67,7 +67,7 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
         require(_duration > 0, "Campaign duration must be greater than 0");
         require(_duration.mul(24 * 60 * 60) <= maxDuration, "Campaign duration exceeds maximum limit");
 
-        _campaignId = this.getNumberOfCampaigns();
+        uint256 _campaignId = this.getNumberOfCampaigns();
         address payable _campaignOwner = payable(msg.sender);
         uint256 _endDate = block.timestamp.add(_duration.mul(24 * 60 * 60));
 
@@ -126,7 +126,7 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
         address[] memory _donorAddresses = campaign.donorAddresses;
         uint256[] memory _donorAmounts = campaign.donorAmounts;
         
-        return (_campaignId, _campaignOwner, _title, _description, _creationDate, _targetFunding, _imageURL, _endDate, _active, _amountRaised, _amountWithdrawn, _donorCount, _donorAddresses[], _donorAmounts[]);
+        return (_campaignId, _campaignOwner, _title, _description, _creationDate, _targetFunding, _imageURL, _endDate, _active, _amountRaised, _amountWithdrawn, _donorCount, _donorAddresses, _donorAmounts);
     }  
 
     /**
@@ -134,7 +134,8 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
      * @return The total number of campaigns.
      */
     function getNumberOfCampaigns() external view virtual returns (uint256) {
-        return uint256 _storage.numberOfCampaigns;
+        uint256 memory numberOfCampaigns = _storage.campaignCount();
+        return numberOfCampaigns;
     }
 
     /**
@@ -147,7 +148,7 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
     function donateToCampaign(uint256 _id) external payable nonReentrant whenNotPaused campaignExists(_id) {
         require(msg.value > 0, "Donation msg.value must be greater than 0");
 
-        Campaign memory campaign = this.getCampaign(_id);
+        Campaign memory campaign = this.campaignGetter(_id);
 
         require(campaign.active, "Campaign is not active");
         require(campaign.endDate > block.timestamp, "Campaign has ended");
@@ -201,7 +202,7 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
     function withdraw(uint256 _id, uint256 _amount) external nonReentrant whenNotPaused campaignExists(_id) {
         require(_amount > 0, "Withdrawal msg.value must be greater than 0");
 
-        Campaign memory campaign = _storage.getCampaign(_id);
+        Campaign memory campaign = _storage.campaignGetter(_id);
 
         require(campaign.campaignOwner == msg.sender, "Only the campaign campaignOwner can withdraw funds");
         require(campaign.active == false, "Campaign is still active");

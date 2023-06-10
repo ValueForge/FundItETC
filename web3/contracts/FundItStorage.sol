@@ -18,7 +18,7 @@ contract FundItStorage is Initializable, OwnableUpgradeable {
     mapping(uint256 => IFundIt.Campaign) public campaigns;
 
     // Total number of campaigns
-    uint256 public numberOfCampaigns = 0;
+    uint256 public campaignCount = 0;
 
     function initialize() external initializer {
         __Ownable_init();
@@ -29,8 +29,16 @@ contract FundItStorage is Initializable, OwnableUpgradeable {
      * @param _newCampaign The Campaign struct to store.
      */
     function addCampaign(IFundIt.Campaign memory _newCampaign) external {
-        campaigns[numberOfCampaigns] = _newCampaign;
-        numberOfCampaigns++;
+        campaigns[campaignCount] = _newCampaign;
+        campaignCount++;
+    }
+
+    /**
+     * @dev External function to count the number of campaigns
+     * @return The number of campaigns
+     */
+    function getNumberOfCampaigns() external view returns (uint256) {
+        return campaignCount;
     }
 
     /**
