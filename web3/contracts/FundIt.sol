@@ -67,7 +67,7 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
         require(_duration > 0, "Campaign duration must be greater than 0");
         require(_duration.mul(24 * 60 * 60) <= maxDuration, "Campaign duration exceeds maximum limit");
 
-        uint256 _campaignId = this.getNumberOfCampaigns();
+        _campaignId = this.getNumberOfCampaigns();
         address payable _campaignOwner = payable(msg.sender);
         uint256 _endDate = block.timestamp.add(_duration.mul(24 * 60 * 60));
 
@@ -134,7 +134,7 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
      * @return The total number of campaigns.
      */
     function getNumberOfCampaigns() external view virtual returns (uint256) {
-        uint256 memory numberOfCampaigns = _storage.campaignCount();
+        uint256 numberOfCampaigns = _storage.campaignCount();
         return numberOfCampaigns;
     }
 
