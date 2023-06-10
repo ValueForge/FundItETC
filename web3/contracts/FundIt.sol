@@ -106,30 +106,6 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
     }
 
     /**
-     * @dev Function to deconstruct a campaign struct.
-     * @param campaign The Campaign struct to deconstruct.
-     * @return The deconstructed Campaign struct.
-     */
-    function deconstructCampaign(Campaign memory campaign) external returns (uint256, address, string memory, string memory, uint256, uint256, string memory, uint256, bool, uint256, uint256, uint256, address[] memory, uint256[] memory){
-        _campaignId = campaign.campaignId;
-        address payable _campaignOwner = campaign.campaignOwner;
-        string memory _title = campaign.title;
-        string memory _description = campaign.description;
-        uint256 _creationDate = campaign.creationDate;
-        uint256 _targetFunding = campaign.targetFunding;
-        string memory _imageURL = campaign.imageURL;
-        uint256 _endDate = campaign.endDate;
-        bool _active = campaign.active;
-        uint256 _amountRaised = campaign.amountRaised;
-        uint256 _amountWithdrawn = campaign.amountWithdrawn;
-        uint256 _donorCount = campaign.donorCount;
-        address[] memory _donorAddresses = campaign.donorAddresses;
-        uint256[] memory _donorAmounts = campaign.donorAmounts;
-        
-        return (_campaignId, _campaignOwner, _title, _description, _creationDate, _targetFunding, _imageURL, _endDate, _active, _amountRaised, _amountWithdrawn, _donorCount, _donorAddresses, _donorAmounts);
-    }  
-
-    /**
      * @dev Function to get the total number of campaigns.
      * @return The total number of campaigns.
      */
