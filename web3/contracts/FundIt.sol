@@ -148,7 +148,7 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
     function donateToCampaign(uint256 _id) external payable nonReentrant whenNotPaused campaignExists(_id) {
         require(msg.value > 0, "Donation msg.value must be greater than 0");
 
-        Campaign memory campaign = this.campaignGetter(_id);
+        Campaign memory campaign = _storage.campaignGetter(_id);
 
         require(campaign.active, "Campaign is not active");
         require(campaign.endDate > block.timestamp, "Campaign has ended");
