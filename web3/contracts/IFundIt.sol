@@ -22,7 +22,6 @@ interface IFundIt {
     function initialize(address _storageAddress) external;
 
     function createCampaign(
-        address payable _campaignOwner,
         string calldata _title,
         string calldata _description,
         uint256 _targetFunding,
