@@ -1,4 +1,4 @@
-/** @type import('hardhat/config').HardhatUserConfig */
+import('hardhat/config').HardhatUserConfig;
 require('@openzeppelin/hardhat-upgrades');
 require("@nomicfoundation/hardhat-chai-matchers");
 require("@nomiclabs/hardhat-web3");

@@ -5,7 +5,7 @@ const { BigNumber } = ethers;
 const { BN, expectEvent, expectRevert, time } = require('@openzeppelin/test-helpers');
 const ProxyAdmin = require('@openzeppelin/contracts/build/contracts/ProxyAdmin.json');
 const ProxyAdminABI = require("@openzeppelin/contracts/build/contracts/ProxyAdmin.json").abi;
-// const { deployContracts } = require('../scripts/deploy'); 
+const { deployContracts } = require('../scripts/deploy'); 
 
 // Define contract variables
 let FundItDeployerFactory, FundItFactory, FundItStorageFactory, FundItProxyFactory, IFundItFactory;
@@ -23,40 +23,7 @@ const OVERRIDE = { gasLimit: 100000 };
 // Define the main test suite
 describe("FundItTest", function () {
   beforeEach(async function () {
-    const [deployer] = await ethers.getSigners();
-  
-    console.log('FundItTest: Deploying contracts with the account:', deployer.address);
-  
-    // Deploy FundItStorage.sol
-    const FundItStorage = await ethers.getContractFactory('FundItStorage');
-    const fundItStorage = await FundItStorage.deploy();
-    await fundItStorage.deployed();
-  
-    console.log('FundItTest: FundItStorage deployed to:', fundItStorage.address);
-  
-    // Deploy FundIt.sol (Implementation)
-    const FundIt = await ethers.getContractFactory('FundIt');
-    const fundIt = await FundIt.deploy();
-    await fundIt.deployed();
-  
-    console.log('FundItTest: FundIt (Implementation) deployed to:', fundIt.address);
-
-    // Deploy FundItDeployer.sol (ProxyAdmin)
-    const FundItDeployer = await ethers.getContractFactory('FundItDeployer');
-    const fundItDeployer = await FundItDeployer.deploy();
-    await fundItDeployer.deployed();
-  
-    console.log('FundItTest: FundItDeployer (ProxyAdmin) deployed to:', fundItDeployer.address);
-  
-    // Deploy FundItProxy.sol (Proxy)
-    const initPayload = fundIt.interface.encodeFunctionData("initialize", [fundItStorage.address]);
-    const FundItProxy = await ethers.getContractFactory('FundItProxy');
-    const fundItProxy = await FundItProxy.deploy(fundIt.address, fundItDeployer.address, initPayload);
-    await fundItProxy.deployed();
-  
-    console.log('FundItTest: FundItProxy (Proxy) deployed to:', fundItProxy.address);
-  
-    return {fundItStorage, fundIt, fundItDeployer, fundItProxy};
+    await deployContracts()
   });
     
   // Test for proper deployment of all contracts
@@ -93,8 +60,8 @@ describe("FundItTest", function () {
       await expect(fundIt.connect(addr1).donateToCampaign(1, { value: donationAmount })).to.be.revertedWith("Campaign does not exist");
     });
 
-    it("Should revert when withdrawing funds before the deadline", async function () {
-      await expect(fundIt.connect(owner).withdrawFunds(0)).to.be.revertedWith("Cannot withdraw funds before the deadline");
+    it("Should revert when withdrawing funds before the endDate", async function () {
+      await expect(fundIt.connect(owner).withdrawFunds(0)).to.be.revertedWith("Cannot withdraw funds before the endDate");
     });
 
     it("Should revert when ending a campaign that has collected funds", async function () {
@@ -111,7 +78,7 @@ describe("FundItTest", function () {
     });
       
     it("Should revert when a non-owner tries to withdraw funds from a campaign", async function () {
-      // Fast-forward to the deadline
+      // Fast-forward to the endDate
       await ethers.provider.send("evm_increaseTime", [DURATION]);
       await ethers.provider.send("evm_mine");
       
@@ -130,7 +97,7 @@ describe("FundItTest", function () {
       expect(campaign.title).to.equal(TITLE);
       expect(campaign.description).to.equal(DESCRIPTION);
       expect(campaign.target).to.equal(TARGET);
-      expect(campaign.deadline).to.equal((await ethers.provider.getBlock("latest")).timestamp + DURATION);
+      expect(campaign.endDate).to.equal((await ethers.provider.getBlock("latest")).timestamp + DURATION);
       expect(campaign.image).to.equal(IMAGE);
       expect(campaign.active).to.equal(true);
     });
@@ -173,8 +140,8 @@ describe("FundItTest", function () {
     });
     
 
-    it("Should allow the campaign owner to withdraw funds after the deadline", async function () {
-      // Fast-forward to the deadline
+    it("Should allow the campaign owner to withdraw funds after the endDate", async function () {
+      // Fast-forward to the endDate
       await ethers.provider.send("evm_increaseTime", [DURATION]);
       await ethers.provider.send("evm_mine");
           
@@ -225,7 +192,7 @@ describe("FundItTest", function () {
     beforeEach(async function () {
       await fundIt.connect(owner).createCampaign(TITLE, DESCRIPTION, TARGET, DURATION, IMAGE, OVERRIDE);
       await fundIt.connect(addr1).createCampaign(TITLE, DESCRIPTION, TARGET, DURATION, IMAGE, OVERRIDE);
-      // Fast-forward to the deadline
+      // Fast-forward to the endDate
       await ethers.provider.send("evm_increaseTime", [DURATION]);
       await ethers.provider.send("evm_mine");
     });

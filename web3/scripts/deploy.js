@@ -1,6 +1,7 @@
-// const hre = require('hardhat');
+const hre = require('hardhat');
+const { ethers } = require('hardhat');
 
-//async function deployContracts() {
+async function deployContracts() {
   const [deployer] = await hre.ethers.getSigners();
 
   console.log('deployContracts: Deploying contracts with the account:', deployer.address);
@@ -33,8 +34,15 @@
   await fundItProxy.deployed();
 
   console.log('deployContracts: FundItProxy (Proxy) deployed to:', fundItProxy.address);
+  console.log('deployContracts: FundItProxy (Proxy) initialized with:', fundItStorage.address);
+  console.log('deployContracts: FundItProxy (Proxy) initialized with:', fundIt.address);
+  console.log('deployContracts: FundItProxy (Proxy) initialized with:', fundItDeployer.address);
+  console.log('deployContracts: FundItProxy (Proxy) initialized with:', initPayload);
+
+  console.log('returning:', FundItStorage, FundIt, FundItDeployer, FundItProxy, '.');
 
   return {fundItStorage, fundIt, fundItDeployer, fundItProxy};
+};
 
 deployContracts()
   .then(() => process.exit(0))
@@ -45,4 +53,4 @@ deployContracts()
 
 module.exports = {
   deployContracts,
-};
+}
