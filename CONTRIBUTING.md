@@ -20,10 +20,10 @@ In order to get the repositories setup before contributions refer to the [README
 
    Let us know you're working on it! We hate wasted labour so it's always helpful to know what our community contributors are working on.
 
-3. _Fork and clone [DAppNode](://github.com/dappnode/DAppNode)_
+3. _Fork and clone [FundItETC](://github.com/ValueForge/FundItETC)_
 
    In general it's a good practice to fork into your own repository. We prefer if issues
-   are addressed in a branch with the issue number in it's name.
+   are addressed in a branch with the issue number in its name.
    i.e. `29_this_is_an_issue`
 
 4. _Make contributions_
@@ -44,7 +44,7 @@ In order to get the repositories setup before contributions refer to the [README
 
 8. _Create a Pull Request_
 
-   At this point you should either have a forked repository with your issue fixes and it is time to put in a PR. Make sure that your PR has something like `addresses #26` or `closes #26` The most important thing is that it has the relevant issue number referenced in the body of the PR.
+   At this point you should have a forked repository with your issue fixes and it is time to put in a PR. Make sure that your PR has something like `addresses #26` or `closes #26` The most important thing is that it has the relevant issue number referenced in the body of the PR.
 
 9. _Make noise!_
 
