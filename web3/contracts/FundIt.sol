@@ -25,15 +25,15 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
 
     FundItStorage private _storage;
 
-    event CampaignCreated(uint256 indexed campaignId, address indexed campaignOwner);
+    event CampaignCreated(uint256 indexed campaignId, address indexed campaignCreator);
 
     event TargetReached(uint256 indexed campaignId, address indexed msgSender, uint256 msgValue);
 
     event DonationMade(uint256 indexed campaignId, address indexed msgSender, uint256 msgValue);
 
-    event CampaignEnded(uint256 indexed campaignId, address indexed campaignOwner);
+    event CampaignEnded(uint256 indexed campaignId, address indexed campaignCreator);
 
-    event Withdrawn(uint256 indexed campaignId, address indexed campaignOwner, uint256 msgValue);
+    event Withdrawn(uint256 indexed campaignId, address indexed campaignCreator, uint256 msgValue);
 
     /// @dev Modifier to check if a campaign exists.
     modifier campaignExists(uint256 _id) {
@@ -68,13 +68,13 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
         require(_duration.mul(24 * 60 * 60) <= maxDuration, "Campaign duration exceeds maximum limit");
 
         _campaignId = this.getNumberOfCampaigns();
-        address payable _campaignOwner = payable(msg.sender);
+        address payable _campaignCreator = payable(msg.sender);
         uint256 _endDate = block.timestamp.add(_duration.mul(24 * 60 * 60));
 
         // Create the campaign struct
         IFundIt.Campaign memory newCampaign = IFundIt.Campaign({
             campaignId: _campaignId,
-            campaignOwner: _campaignOwner,
+            campaignCreator: _campaignCreator,
             title: _title,
             description: _description,
             creationDate: block.timestamp,
@@ -91,7 +91,7 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
 
         _storage.addCampaign(newCampaign);
 
-        emit CampaignCreated(_campaignId, _campaignOwner);
+        emit CampaignCreated(_campaignId, _campaignCreator);
     }
 
     /**
@@ -148,14 +148,14 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
     }
 
     /**
-     * @dev Allows a campaign campaignOwner to end a campaign early. Sets active in Campaign struct to false.
+     * @dev Allows a campaign creator to end a campaign early. Sets active in Campaign struct to false.
      * Requires that the campaign is active.
      * Emits a CampaignEnded event.
      */
     function endCampaign(uint256 _id) external nonReentrant whenNotPaused campaignExists(_id) {
         Campaign memory campaign = _storage.campaignGetter(_id);
 
-        require(campaign.campaignOwner == msg.sender, "Only the campaign campaignOwner can end the campaign manually");
+        require(campaign.campaignCreator == msg.sender, "Only the campaign owner can end the campaign manually");
         require(campaign.active, "Campaign is already ended");
 
         campaign.active = false;
@@ -167,11 +167,11 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
     }
 
     /**
-     * @dev Allows the campaign campaignOwner to withdraw funds from the campaign.
+     * @dev Allows the campaign creator to withdraw funds from the campaign.
      * @param _id The ID of the campaign to withdraw funds from.
      * @param _amount The msg.value of funds to withdraw.
      * Requires that the campaign is not active.
-     * Requires that the campaign campaignOwner is the message sender.
+     * Requires that the campaign campaignCreator_campaignCreator is the message sender.
      * Requires that the msg.value to withdraw is less than or equal to the msg.value raised minus the msg.value previously withdrawn.
      * Emits a Withdrawn event.
      */
@@ -180,7 +180,7 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
 
         Campaign memory campaign = _storage.campaignGetter(_id);
 
-        require(campaign.campaignOwner == msg.sender, "Only the campaign campaignOwner can withdraw funds");
+        require(campaign.campaignCreator == msg.sender, "Only the campaign owner can withdraw funds");
         require(campaign.active == false, "Campaign is still active");
         require(campaign.amountRaised.sub(campaign.amountWithdrawn) >= _amount, "Insufficient funds in the campaign");
 
@@ -188,7 +188,7 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
         campaign.amountWithdrawn = campaign.amountWithdrawn.add(_amount);
         _storage.updateCampaign(_id, campaign);
 
-        emit Withdrawn(_id, campaign.campaignOwner, _amount);
+        emit Withdrawn(_id, campaign.campaignCreator, _amount);
     }
 
     /// @dev Pauses the contract, preventing any actions.
