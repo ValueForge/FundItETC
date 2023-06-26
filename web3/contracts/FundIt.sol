@@ -122,7 +122,7 @@ contract FundIt is IFundIt, Initializable, OwnableUpgradeable, PausableUpgradeab
      * Emits a DonationMade event.
      */
     function donateToCampaign(uint256 _id) external payable nonReentrant whenNotPaused campaignExists(_id) {
-        require(msg.value > 0, "Donation msg.value must be greater than 0");
+        require(msg.value > 0, "Donation value must be greater than 0");
 
         Campaign memory campaign = _storage.campaignGetter(_id);
 
