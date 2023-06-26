@@ -9,7 +9,7 @@
   "license": "MPL-2.0",
   "scripts": {
     "build": "npx thirdweb@latest detect",
-    "deploy": "npx thirdweb@latest deploy",
+    "deploy": "npx hardhat run scripts/deploy.js --network hardhat",
     "release": "npx thirdweb@latest release"
   },
   "devDependencies": {
