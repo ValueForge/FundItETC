@@ -1,0 +1,16 @@
+name: Greetings
+
+on: [pull_request_target, issues]
+
+jobs:
+  greeting:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+    - uses: actions/first-interaction@v1
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        issue-message: "Thank you for creating this issue! You are helping ValueForge make sure that FundItETC remains a safe, secure, and reliable financial tool for the Ethereum Classic ecosystem. We welcome new contributors like yourself and encourage you to join ongoing discussions or pitch in wherever you feel like your skills and talent are needed. As a next step, familiarize yourself with our Contributor's Guide and please read our community Code of Conduct. Thank you again for helping open source projects like FundItETC stay open."
+        pr-message: "Congratulations! You just created your first pull request to FundItETC and joined countless others who build and maintain open source projects like this. What next? At ValueForge, we have a PR approval process that your submission will go through. Other programmers and maintainers will review and test your submission. Thank you for supporting FundItETC, open source projects, and Ethereum Classic."
