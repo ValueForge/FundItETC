@@ -12,19 +12,20 @@ import "./FundIt.sol";
 contract FundItDeployer is OwnableUpgradeable {
     ProxyAdmin public proxyAdmin;
     TransparentUpgradeableProxy public proxy;
-    FundIt public fundIt;
+    address public fundIt;
     FundItStorage public _storage;
 
     constructor() {
         proxyAdmin = new ProxyAdmin();
-        fundIt = new FundIt();
         _storage = new FundItStorage();
+        _storage.initialize();
 
-        // Create the proxy contract and link it to the logic contract
+        fundIt = address(new FundIt());
+
         proxy = new TransparentUpgradeableProxy(
-            address(fundIt),
+            fundIt,
             address(proxyAdmin),
-            abi.encodePacked(_storage)  // This parameter can be used to initialize the FundIt contract, if needed
+            abi.encodeWithSignature("initialize(address)", address(_storage))
         );
     }
 }
