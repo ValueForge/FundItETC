@@ -27,13 +27,12 @@ const OVERRIDE = { gasLimit: 100000 };
  */
 
 describe("Deployment", function () {
-  contracts = await deployContracts();
-  [owner, addr1, addr2] = await ethers.getSigners();
-
   /**
   * @dev Test case to check that the contracts are deployed correctly.
    */
   it("Should deploy correctly", async function () {
+    contracts = await deployContracts();
+    [owner, addr1, addr2] = await ethers.getSigners();
     expect(await contracts.fundIt.address).to.exist;
     expect(await contracts.fundItStorage.address).to.exist;
     expect(await contracts.fundItProxy.address).to.exist;
@@ -57,6 +56,7 @@ describe("Deployment", function () {
     expect(await contracts.fundItDeployer.owner).to.equal(ethers.getSigners(0));
     expect(await contracts.fundIt._storage).to.equal(contracts.fundItStorage.address);
   });
+});
 });
 
 /**
