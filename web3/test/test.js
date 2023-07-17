@@ -26,13 +26,15 @@ const OVERRIDE = { gasLimit: 100000 };
  * @dev Comprehensive test suite for the FundIt, FundItStorage, FundItProxy, and FundItDeployer contracts.
  */
 
-describe("Deployment", function () {
+describe("Deployment", async function () {
+  contracts = await deployContracts();
+  console.log(ethers.getSigners());
+  [owner, addr1, addr2] = ethers.getSigners();
+
   /**
   * @dev Test case to check that the contracts are deployed correctly.
    */
   it("Should deploy correctly", async function () {
-    contracts = await deployContracts();
-    [owner, addr1, addr2] = await ethers.getSigners();
     expect(await contracts.fundIt.address).to.exist;
     expect(await contracts.fundItStorage.address).to.exist;
     expect(await contracts.fundItProxy.address).to.exist;
