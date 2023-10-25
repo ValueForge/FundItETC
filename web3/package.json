@@ -22,7 +22,7 @@
     "@openzeppelin/hardhat-upgrades": "^1.23.1",
     "hardhat": "^2.14.0",
     "mocha": "^10.2.0",
-    "web3": "^0.20.7"
+    "web3": "^4.2.1"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.9.2",
